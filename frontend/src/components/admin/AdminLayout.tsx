@@ -1,6 +1,7 @@
-import { ReactNode, useEffect } from "react";
+import {  useEffect } from "react";
+import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAdminAuth } from "@/contexts/AdminAuthContext";
+import { useAdminAuth } from "../../contexts/AdminAuthContext";
 import AdminSidebar from "./AdminSidebar";
 
 const AdminLayout = ({ children }: { children: ReactNode }) => {

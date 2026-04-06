@@ -1,24 +1,33 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Lock, Mail, Eye, EyeOff, Shield } from "lucide-react";
-import { useAdminAuth } from "@/contexts/AdminAuthContext";
+import { useAdminAuth } from "../../contexts/AdminAuthContext";
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState("");
+  const [email,    setEmail]    = useState("");
   const [password, setPassword] = useState("");
-  const [showPw, setShowPw] = useState(false);
-  const [error, setError] = useState("");
+  const [showPw,   setShowPw]   = useState(false);
+  const [error,    setError]    = useState("");
+  const [loading,  setLoading]  = useState(false);
   const { login } = useAdminAuth();
-  const navigate = useNavigate();
+  const navigate  = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (login(email, password)) {
+    setLoading(true);
+    try {
+      await login(email, password);
       navigate("/admin");
-    } else {
-      setError("Email ou mot de passe incorrect");
+    } catch (err: any) {
+      const msg =
+        err.response?.data?.errors?.email?.[0] ||
+        err.response?.data?.message ||
+        "Email ou mot de passe incorrect";
+      setError(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -71,7 +80,9 @@ const AdminLogin = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-xs font-semibold uppercase tracking-wider text-[#374151] mb-1 block">Email</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-[#374151] mb-1 block">
+                Email
+              </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#888]" />
                 <input
@@ -84,8 +95,11 @@ const AdminLogin = () => {
                 />
               </div>
             </div>
+
             <div>
-              <label className="text-xs font-semibold uppercase tracking-wider text-[#374151] mb-1 block">Mot de passe</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-[#374151] mb-1 block">
+                Mot de passe
+              </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#888]" />
                 <input
@@ -96,32 +110,39 @@ const AdminLogin = () => {
                   placeholder="••••••••"
                   required
                 />
-                <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] hover:text-[#374151]">
+                <button
+                  type="button"
+                  onClick={() => setShowPw(!showPw)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] hover:text-[#374151]"
+                >
                   {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
+
             <motion.button
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: loading ? 1 : 1.01 }}
+              whileTap={{ scale: loading ? 1 : 0.98 }}
               type="submit"
-              className="w-full py-3 rounded-lg bg-[#1A56DB] text-white font-bold text-sm hover:bg-[#1347BE] transition shadow-lg shadow-[#1A56DB]/20"
+              disabled={loading}
+              className="w-full py-3 rounded-lg bg-[#1A56DB] text-white font-bold text-sm hover:bg-[#1347BE] transition shadow-lg shadow-[#1A56DB]/20 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Se connecter
+              {loading ? (
+                <>
+                  <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                  </svg>
+                  Connexion...
+                </>
+              ) : (
+                "Se connecter"
+              )}
             </motion.button>
           </form>
-
-          <p className="text-center text-sm text-[#888] mt-6">
-            Pas encore de compte ?{" "}
-            <Link to="/admin/register" className="text-[#1A56DB] font-semibold hover:underline">
-              Créer un compte
-            </Link>
-          </p>
         </div>
 
-        <p className="text-center text-xs text-[#888] mt-4">
-          Identifiants par défaut : admin@3dservices.fr / admin123
-        </p>
+        {/* Supprimé : lien register et identifiants par défaut */}
       </motion.div>
     </div>
   );

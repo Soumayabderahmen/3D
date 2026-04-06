@@ -1,6 +1,5 @@
-import { Link } from "react-router-dom";
 import { Leaf } from "lucide-react";
-import SectionReveal from "@/components/SectionReveal";
+import SectionReveal from "../../components/SectionReveal";
 
 const Formulas = () => (
   <section className="py-20 bg-card">
@@ -12,7 +11,7 @@ const Formulas = () => (
             <div className="rounded-xl overflow-hidden shadow-card">
               <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
                 <iframe
-                  src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+  src="https://www.youtube.com/embed/r9-DNqxWek4?start=2"
                   title="3D Services"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
@@ -22,9 +21,7 @@ const Formulas = () => (
             </div>
             <p className="text-muted-foreground text-sm mt-4 leading-relaxed">
               Notre société de débarras à Lyon se veut être une société responsable. Les encombrants récupérés lors de nos débarras sont soit : donnés à des associations, revendus sur des marchés, revalorisés afin de permettre un{" "}
-              <Link to="/debarras-gratuit" className="text-secondary underline hover:text-secondary/80">
                 débarras gratuit
-              </Link>{" "}
               ou encore recyclés dans des déchetteries professionnelles.
             </p>
           </div>

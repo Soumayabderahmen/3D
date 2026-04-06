@@ -6,7 +6,7 @@ import {
   HelpCircle, FileText, User, Search
 } from "lucide-react";
 import { useState } from "react";
-import { useAdminAuth } from "@/contexts/AdminAuthContext";
+import { useAdminAuth } from "../../contexts/AdminAuthContext";
 
 const links = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },

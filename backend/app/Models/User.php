@@ -7,11 +7,12 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -22,6 +23,12 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone',
+        'address',
+        'avatar',
+        'role',
+        'company_name',
+        'siret',
     ];
 
     /**
@@ -46,4 +53,11 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+     public function getAvatarUrlAttribute(): ?string
+    {
+        if (!$this->avatar) return null;
+        return asset('storage/' . $this->avatar);
+    }
+
+    protected $appends = ['avatar_url'];
 }
