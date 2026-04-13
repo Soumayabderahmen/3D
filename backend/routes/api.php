@@ -1,8 +1,12 @@
 <?php
 
+use App\Http\Controllers\Api\ActualiteController;
 use App\Http\Controllers\Api\ChatbotConfigController;
 use App\Http\Controllers\Api\ContactController;
+use App\Http\Controllers\Api\DevisController;
 use App\Http\Controllers\Api\FaqController;
+use App\Http\Controllers\Api\ServiceController;
+use App\Http\Controllers\Api\SubServiceController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +34,9 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::post('/contact', [ContactController::class, 'store'])
     ->middleware('throttle:5,1'); // max 5 requêtes/minute par IP
+Route::post('/devis', [DevisController::class, 'store'])
+    ->middleware('throttle:5,1');
+    Route::get('/actualites', [ActualiteController::class, 'publicIndex']);
 
 // Routes admin (protégées par Sanctum ou autre guard)
 Route::middleware('auth:sanctum')->group(function () {
@@ -38,9 +45,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/admin/contacts/{contact}', [ContactController::class, 'destroy']);
     Route::prefix('chatbot-config')->group(function () {
 
-        // GET    /api/chatbot-config          → récupère la config active
 
-        // POST   /api/chatbot-config          → crée la config (première fois)
         Route::post('/',        [ChatbotConfigController::class, 'store']);
 
         // GET    /api/chatbot-config/{id}     → récupère par ID
@@ -55,5 +60,36 @@ Route::middleware('auth:sanctum')->group(function () {
         // DELETE /api/chatbot-config/{id}     → supprime la config
         Route::delete('/{id}',  [ChatbotConfigController::class, 'destroy']);
     });
+     Route::get('/admin/devis',                       [DevisController::class, 'index']);
+    Route::get('/admin/devis/{devis}',               [DevisController::class, 'show']);
+    Route::patch('/admin/devis/{devis}/statut',      [DevisController::class, 'updateStatut']);
+    Route::delete('/admin/devis/{devis}',            [DevisController::class, 'destroy']);
+    Route::get   ('/admin/services',                    [ServiceController::class, 'index']);
+    Route::post  ('/admin/services',                    [ServiceController::class, 'store']);
+    Route::get   ('/admin/services/{service}',          [ServiceController::class, 'show']);
+    Route::put   ('/admin/services/{service}',          [ServiceController::class, 'update']);
+    Route::delete('/admin/services/{service}',          [ServiceController::class, 'destroy']);
+    Route::patch ('/admin/services/reorder',            [ServiceController::class, 'reorder']);
+
+    // Sous-services
+    Route::get   ('/admin/sub-services',                [SubServiceController::class, 'index']);
+    Route::post  ('/admin/sub-services',                [SubServiceController::class, 'store']);
+    Route::get   ('/admin/sub-services/{subService}',   [SubServiceController::class, 'show']);
+    Route::put   ('/admin/sub-services/{subService}',   [SubServiceController::class, 'update']);
+    Route::delete('/admin/sub-services/{subService}',   [SubServiceController::class, 'destroy']);
+    Route::patch ('/admin/sub-services/{subService}/toggle', [SubServiceController::class, 'toggle']);
+    Route::patch ('/admin/sub-services/reorder',        [SubServiceController::class, 'reorder']);
+
+    // Upload image sous-service
+    Route::post('/admin/sub-services/upload-image',     [SubServiceController::class, 'uploadImage']);
+    Route::get   ('/admin/actualites',                       [ActualiteController::class, 'index']);
+    Route::post  ('/admin/actualites',                       [ActualiteController::class, 'store']);
+    Route::get   ('/admin/actualites/{actualite}',           [ActualiteController::class, 'show']);
+    Route::put   ('/admin/actualites/{actualite}',           [ActualiteController::class, 'update']);
+    Route::delete('/admin/actualites/{actualite}',           [ActualiteController::class, 'destroy']);
+    Route::patch ('/admin/actualites/{actualite}/toggle',    [ActualiteController::class, 'toggle']);
+    Route::post  ('/admin/actualites/upload-image',          [ActualiteController::class, 'uploadImage']);
+
 });
+
         Route::get('/chatbot-config',         [ChatbotConfigController::class, 'index']);

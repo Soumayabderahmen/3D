@@ -9,7 +9,7 @@ use App\Models\ContactMessage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-
+use Illuminate\Support\Facades\Http;
 class ContactController extends Controller
 {
     /**
@@ -17,6 +17,21 @@ class ContactController extends Controller
      */
     public function store(StoreContactRequest $request): JsonResponse
     {
+        // 1. Vérification Google reCAPTCHA
+    $captchaResponse = Http::asForm()->post(
+        'https://www.google.com/recaptcha/api/siteverify',
+        [
+            'secret'   => env('RECAPTCHA_SECRET'),
+            'response' => $request->captcha,
+        ]
+    );
+
+    if (! $captchaResponse->json('success')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Captcha invalide. Veuillez réessayer.',
+        ], 422);
+    }
         // 1. Sauvegarde en base
         $contact = ContactMessage::create($request->validated());
 

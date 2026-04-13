@@ -2,9 +2,10 @@ import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Check, MapPin, Phone, Mail, Zap, Facebook, Instagram, Youtube, ChevronRight } from "lucide-react";
-import Layout from "@/components/layout/Layout";
-import SEOHead from "@/components/SEOHead";
-import { getSEOForPath } from "@/data/seo";
+import Layout from "../components/layout/Layout";
+import SEOHead from "../components/SEOHead";
+import { getSEOForPath } from "../data/seo";
+import logo3d from "@/assets/logo-3d-services.png";
 
 
 const fadeUp = {
@@ -53,7 +54,7 @@ const About = () => (
     {/* HERO */}
     <section className="relative bg-[hsl(224,47%,15%)] py-20 sm:py-28 overflow-hidden">
       <span className="absolute inset-0 flex items-center justify-center text-[60px] sm:text-[120px] font-black text-white/[0.05] tracking-widest select-none pointer-events-none leading-none whitespace-nowrap">
-        ROYAL PROPRETÉ
+       3D Services
       </span>
       <div className="relative z-10 max-w-[700px] mx-auto px-6 text-center">
         <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-[32px] sm:text-[46px] font-black text-white leading-tight mb-4">
@@ -74,7 +75,7 @@ const About = () => (
             {/* Left */}
             <div className="flex flex-col items-center md:items-start gap-4">
               <div className="w-[120px] h-[120px] rounded-full bg-[hsl(224,47%,15%)] border-4 border-white shadow-lg flex items-center justify-center">
-                <span className="text-2xl font-black text-white">3DS</span>
+          <img src={logo3d} alt="3D Services" className="w-[120px] h-[120px] rounded-full bg-[hsl(224,47%,15%)] border-4 border-white shadow-lg flex items-center justify-center" />
               </div>
               <div className="text-center md:text-left">
                 <p className="text-base font-bold text-[hsl(224,47%,15%)]">3D Services</p>

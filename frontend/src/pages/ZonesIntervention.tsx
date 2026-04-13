@@ -2,12 +2,12 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { MapPin } from "lucide-react";
-import Layout from "@/components/layout/Layout";
-import SectionReveal from "@/components/SectionReveal";
-import FinalCTA from "@/components/home/FinalCTA";
-import { SERVICES, ARRONDISSEMENTS_LYON, VILLES_LYON } from "@/data/services";
-import SEOHead from "@/components/SEOHead";
-import { getSEOForPath } from "@/data/seo";
+import Layout from "../components/layout/Layout";
+import SectionReveal from "../components/SectionReveal";
+import FinalCTA from "../components/home/FinalCTA";
+import { SERVICES, ARRONDISSEMENTS_LYON, VILLES_LYON } from "../data/services";
+import SEOHead from "../components/SEOHead";
+import { getSEOForPath } from "../data/seo";
 
 
 const ZonesIntervention = () => {

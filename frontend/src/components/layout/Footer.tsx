@@ -24,7 +24,7 @@ const Footer = () => (
         {/* Col 1 */}
         <div>
           <Link to="/" className="flex items-center gap-2 mb-4">
-            <img src={logo3d} alt="3D Services" className="h-10 w-auto brightness-0 invert" />
+          <img src={logo3d} alt="3D Services" className="h-10 w-auto" />
           </Link>
           <p className="text-sm text-primary-foreground/60 mb-4">
             Débarras & Nettoyage à Lyon et région depuis 2015
@@ -99,7 +99,7 @@ const Footer = () => (
       {/* Separator */}
       <div className="mt-12 pt-8 border-t border-gold/20">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-primary-foreground/40">
-          <span>© 2015–2026 3D Services — Tous droits réservés</span>
+          <span>© 2026 3D Services — Tous droits réservés</span>
           <div className="flex gap-4">
             <Link to="/mentions-legales" className="hover:text-primary-foreground/60 transition-colors">Mentions légales</Link>
             <Link to="/politique-de-confidentialite" className="hover:text-primary-foreground/60 transition-colors">Politique de confidentialité</Link>

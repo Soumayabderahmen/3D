@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import Layout from "@/components/layout/Layout";
-import SectionReveal from "@/components/SectionReveal";
-import SEOHead from "@/components/SEOHead";
-import { getSEOForPath } from "@/data/seo";
+import Layout from "../components/layout/Layout";
+import SectionReveal from "../components/SectionReveal";
+import SEOHead from "../components/SEOHead";
+import { getSEOForPath } from "../data/seo";
 
 
 export interface Article {

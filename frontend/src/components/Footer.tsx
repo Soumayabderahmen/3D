@@ -52,7 +52,7 @@ const Footer = () => (
       </div>
 
       <div className="mt-12 pt-8 border-t border-background/10 text-center text-sm text-background/50">
-        © 2015–2026 3D Services. Tous droits réservés.
+        © 2026 3D Services. Tous droits réservés.
       </div>
     </div>
   </footer>

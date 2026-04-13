@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Home, FileText, Star, Phone as PhoneIcon, Sparkles, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import logo3d from "@/assets/logo-3d-services.png";
+import logo3d from "../../assets/3dservices.png";
 
 const navLinks = [
   { label: "Accueil", href: "/", icon: Home },

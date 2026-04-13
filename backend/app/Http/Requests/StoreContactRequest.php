@@ -20,6 +20,8 @@ class StoreContactRequest extends FormRequest
             'email'   => 'required|email|max:255',
             'sujet'   => 'nullable|string|max:100',
             'message' => 'nullable|string|max:3000',
+            'captcha' => 'required|string',
+
         ];
     }
 

@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import SectionReveal from "../components/SectionReveal";
 import SEOHead from "../components/SEOHead";
 import { getSEOForPath } from "../data/seo";
-
+import ReCAPTCHA from "react-google-recaptcha";
 // ─── Config ────────────────────────────────────────────────────────
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
 
@@ -22,6 +22,8 @@ interface ContactForm {
   email: string;
   sujet: string;
   message: string;
+    captcha: string;
+
 }
 
 interface ApiError {
@@ -30,7 +32,8 @@ interface ApiError {
 }
 
 const INITIAL_FORM: ContactForm = {
-  prenom: "", nom: "", tel: "", email: "", sujet: "", message: "",
+  prenom: "", nom: "", tel: "", email: "", sujet: "", message: "",  captcha: "",
+
 };
 
 const zones = [
@@ -62,6 +65,10 @@ const Contact = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    if (!form.captcha) {
+  toast.error("Veuillez valider le captcha");
+  return;
+}
     e.preventDefault();
     setFieldErrors({});
 
@@ -238,7 +245,7 @@ const Contact = () => {
                     </button>
                   </motion.div>
                 ) : (
-                  <form onSubmit={handleSubmit} noValidate>
+                  <form onSubmit={handleSubmit} noValidate >
                     <h2 className="font-display font-bold text-lg text-foreground mb-5">
                       Envoyez-nous un message
                     </h2>
@@ -324,7 +331,12 @@ const Contact = () => {
                         <p className="text-destructive text-xs mt-1">{fieldErrors.message}</p>
                       )}
                     </div>
-
+<div className="mb-5">
+  <ReCAPTCHA
+    sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+    onChange={(token) => update("captcha", token || "")}
+  />
+</div>
                     <button
                       type="submit"
                       disabled={loading}

@@ -1,448 +1,321 @@
-import { useState } from "react";
+// src/pages/admin/AdminSubServices.tsx
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Pencil, Trash2, X, Save, GripVertical, Eye, EyeOff, ChevronDown, RotateCcw, Image, ListChecks, FileText } from "lucide-react";
+import {
+  Plus, Pencil, Trash2, Eye, EyeOff,
+  GripVertical, Image, ListChecks, Loader2,
+  AlertCircle, RefreshCw, RotateCcw, X,
+} from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
-import { useServicesData } from "../../hooks/useServicesData";
-import type { AdminSubService} from "../../hooks/useServicesData";
-import { SERVICES } from "../../data/services";
+import   SubServiceFormModal from "../../components/admin/SubServiceFormModal";
+import { servicesApi, subServicesApi } from "../../services/servicesApi";
+import type { ServiceConfig, SubServiceConfig, SubServiceFormData } from "../../types/services";
+import { toast } from "sonner";
 
 const AdminSubServices = () => {
-  const { subServices, addSubService, updateSubService, deleteSubService, getByParent, resetToDefaults } = useServicesData();
-  const [activeTab, setActiveTab] = useState(SERVICES[0].slug);
-  const [editing, setEditing] = useState<AdminSubService | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [confirmReset, setConfirmReset] = useState(false);
+  const [services, setServices]       = useState<ServiceConfig[]>([]);
+  const [subServices, setSubServices] = useState<SubServiceConfig[]>([]);
+  const [activeTab, setActiveTab]     = useState<number | null>(null);
+  const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState<string | null>(null);
+  const [showForm, setShowForm]       = useState(false);
+  const [editing, setEditing]         = useState<SubServiceConfig | null>(null);
+  const [deletingId, setDeletingId]   = useState<number | null>(null);
+  const [togglingId, setTogglingId]   = useState<number | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<SubServiceConfig | null>(null);
+  const [confirmReset, setConfirmReset]   = useState(false);
 
-  const currentService = SERVICES.find(s => s.slug === activeTab)!;
-  const currentSubs = getByParent(activeTab);
-
-  const handleSave = (data: AdminSubService) => {
-    if (editing) {
-      updateSubService(data.id, data);
-    } else {
-      addSubService({ ...data, parentSlug: activeTab });
+  // ── Load services + sub-services ───────────────────────────────
+  const fetchAll = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [svcs, subs] = await Promise.all([servicesApi.list(), subServicesApi.list()]);
+      setServices(svcs);
+      setSubServices(subs);
+      if (!activeTab && svcs.length) setActiveTab(svcs[0].id);
+    } catch {
+      setError("Impossible de charger les données.");
+    } finally {
+      setLoading(false);
     }
-    setEditing(null);
+  }, [activeTab]);
+
+  useEffect(() => { fetchAll(); }, []);
+
+  const currentSubs = subServices.filter(s => s.service_id === activeTab);
+  const currentService = services.find(s => s.id === activeTab);
+
+  // ── Save ────────────────────────────────────────────────────────
+  const handleSave = async (data: SubServiceFormData, id?: number) => {
+    if (id) {
+      const updated = await subServicesApi.update(id, data);
+      setSubServices(prev => prev.map(s => s.id === id ? updated : s));
+      toast.success("Sous-service mis à jour !");
+    } else {
+      const created = await subServicesApi.create(data);
+      setSubServices(prev => [...prev, created]);
+      toast.success("Sous-service créé !");
+    }
     setShowForm(false);
+    setEditing(null);
   };
 
-  const handleToggle = (id: string, active: boolean) => {
-    updateSubService(id, { active: !active });
+  // ── Toggle active ───────────────────────────────────────────────
+  const handleToggle = async (sub: SubServiceConfig) => {
+    setTogglingId(sub.id);
+    try {
+      const result = await subServicesApi.toggle(sub.id);
+      setSubServices(prev => prev.map(s => s.id === sub.id ? { ...s, active: result.active } : s));
+    } catch {
+      toast.error("Erreur lors de la mise à jour.");
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
+  // ── Delete ──────────────────────────────────────────────────────
+  const handleDelete = async (sub: SubServiceConfig) => {
+    setDeletingId(sub.id);
+    setConfirmDelete(null);
+    try {
+      await subServicesApi.delete(sub.id);
+      setSubServices(prev => prev.filter(s => s.id !== sub.id));
+      toast.success("Sous-service supprimé.");
+    } catch {
+      toast.error("Impossible de supprimer.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  // ── Reset (supprimer tous les sous-services du tab courant) ─────
+  const handleReset = async () => {
+    setConfirmReset(false);
+    if (!activeTab) return;
+    const toDelete = subServices.filter(s => s.service_id === activeTab);
+    try {
+      await Promise.all(toDelete.map(s => subServicesApi.delete(s.id)));
+      setSubServices(prev => prev.filter(s => s.service_id !== activeTab));
+      toast.success("Sous-services supprimés.");
+    } catch {
+      toast.error("Erreur lors de la suppression.");
+    }
   };
 
   return (
     <AdminLayout>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+
+        {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-extrabold text-[#0D1B3E]">Sous-Services</h1>
-            <p className="text-sm text-[#888]">{subServices.length} sous-services au total</p>
+            <p className="text-sm text-[#888]">
+              {loading ? "Chargement..." : `${subServices.length} sous-service${subServices.length > 1 ? "s" : ""} au total`}
+            </p>
           </div>
-          <div className="flex gap-2">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setConfirmReset(true)}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[#E5E7EB] text-sm text-[#888] hover:text-[#0D1B3E] hover:border-[#0D1B3E] transition"
-            >
-              <RotateCcw className="w-4 h-4" /> Réinitialiser
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+          <div className="flex items-center gap-2">
+            <button onClick={fetchAll} disabled={loading}
+              className="p-2 rounded-lg hover:bg-[#EEF2FF] text-[#1A56DB] transition disabled:opacity-40">
+              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+            </button>
+            {currentSubs.length > 0 && (
+              <button onClick={() => setConfirmReset(true)}
+                className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[#E5E7EB] text-sm text-[#888] hover:text-[#0D1B3E] hover:border-[#0D1B3E] transition">
+                <RotateCcw className="w-4 h-4" /> Tout supprimer
+              </button>
+            )}
+            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
               onClick={() => { setEditing(null); setShowForm(true); }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#1A56DB] text-white text-sm font-bold hover:bg-[#1347BE] transition"
-            >
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#1A56DB] text-white text-sm font-bold hover:bg-[#1347BE] transition">
               <Plus className="w-4 h-4" /> Ajouter
             </motion.button>
           </div>
         </div>
 
+        {/* Error */}
+        {error && (
+          <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-5 text-sm">
+            <AlertCircle className="w-4 h-4 shrink-0" />{error}
+            <button onClick={() => setError(null)} className="ml-auto"><X className="w-4 h-4" /></button>
+          </div>
+        )}
+
         {/* Service tabs */}
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-          {SERVICES.map(s => (
-            <button
-              key={s.slug}
-              onClick={() => setActiveTab(s.slug)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition ${
-                activeTab === s.slug
-                  ? "text-white shadow-lg"
-                  : "bg-white border border-[#E5E7EB] text-[#374151] hover:border-[#1A56DB] hover:text-[#1A56DB]"
-              }`}
-              style={activeTab === s.slug ? { backgroundColor: s.colorHex } : {}}
-            >
-              {s.title} ({getByParent(s.slug).length})
-            </button>
-          ))}
-        </div>
+        {!loading && (
+          <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+            {services.map(s => (
+              <button key={s.id} onClick={() => setActiveTab(s.id)}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition ${
+                  activeTab === s.id ? "text-white shadow-lg" : "bg-white border border-[#E5E7EB] text-[#374151] hover:border-[#1A56DB] hover:text-[#1A56DB]"
+                }`}
+                style={activeTab === s.id ? { backgroundColor: s.color_hex } : {}}>
+                {s.title} ({subServices.filter(sub => sub.service_id === s.id).length})
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Skeleton */}
+        {loading && (
+          <div className="grid gap-3">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-white border border-[#E5E7EB] rounded-xl p-4 animate-pulse flex items-center gap-4">
+                <div className="w-4 h-4 bg-[#E5E7EB] rounded" />
+                <div className="w-14 h-10 bg-[#E5E7EB] rounded-lg" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-[#E5E7EB] rounded w-1/3" />
+                  <div className="h-3 bg-[#E5E7EB] rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Empty */}
+        {!loading && currentSubs.length === 0 && !error && (
+          <div className="bg-white rounded-xl border border-[#E5E7EB] py-16 text-center">
+            <ListChecks className="w-10 h-10 text-[#D1D5DB] mx-auto mb-3" />
+            <p className="text-[#888] font-medium">Aucun sous-service</p>
+            <p className="text-sm text-[#888] mt-1">Cliquez sur "Ajouter" pour créer le premier.</p>
+          </div>
+        )}
 
         {/* Sub-services list */}
         <div className="grid gap-3">
           <AnimatePresence mode="popLayout">
             {currentSubs.map((sub, i) => (
-              <motion.div
-                key={sub.id}
-                layout
-                initial={{ opacity: 0, y: 10 }}
+              <motion.div key={sub.id} layout
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, x: -100 }}
+                exit={{ opacity: 0, x: -80, height: 0 }}
                 transition={{ delay: i * 0.03 }}
-                className="bg-white border border-[#E5E7EB] rounded-xl p-4 hover:shadow-md transition-shadow"
-              >
+                className={`bg-white border border-[#E5E7EB] rounded-xl p-4 hover:shadow-md transition-shadow ${!sub.active ? "opacity-60" : ""}`}>
                 <div className="flex items-center gap-4">
                   <GripVertical className="w-4 h-4 text-[#CCC] shrink-0 cursor-grab" />
-                  
+
                   {/* Thumbnail */}
-                  {sub.image ? (
-                    <img src={sub.image} alt={sub.title} className="w-14 h-10 rounded-lg object-cover shrink-0" />
-                  ) : (
-                    <div className="w-14 h-10 rounded-lg bg-[#F3F4F6] flex items-center justify-center shrink-0">
-                      <Image className="w-4 h-4 text-[#CCC]" />
+{sub.image ? (
+  <img
+    src={`http://localhost:8000${sub.image}`}
+    alt={sub.title}
+    className="w-14 h-10 rounded-lg object-cover shrink-0 border border-[#E5E7EB]"
+    onError={(e) => {
+      e.currentTarget.style.display = "none";
+    }}
+  />
+) : (
+                    <div className="w-14 h-10 rounded-lg bg-[#F3F4F6] flex items-center justify-center shrink-0 text-xl">
+                      {sub.icon}
                     </div>
                   )}
 
+                  {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-[#0D1B3E] text-sm">{sub.title}</p>
-                    <p className="text-xs text-[#888] truncate">{sub.desc}</p>
-                    <div className="flex gap-2 mt-1">
+                    <p className="font-bold text-[#0D1B3E] text-sm truncate">{sub.title}</p>
+                    {sub.desc && <p className="text-xs text-[#888] truncate mt-0.5">{sub.desc}</p>}
+                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#1A56DB] font-medium">
-                        {sub.prestations.length} prestations
+                        {sub.prestations?.length ?? 0} prestations
                       </span>
-                      {sub.sections && (
+                      {sub.sections?.length > 0 && (
                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#FEF3C7] text-[#92400E] font-medium">
                           {sub.sections.length} sections
                         </span>
                       )}
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F3F4F6] text-[#888] font-medium">
-                        /{currentService.slug}/{sub.slug}
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F3F4F6] text-[#888] font-mono">
+                        /{currentService?.slug}/{sub.slug}
                       </span>
+                      {!sub.active && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 font-medium">Inactif</span>
+                      )}
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => handleToggle(sub.id, sub.active)}
-                    className={`p-2 rounded-lg transition ${sub.active ? "text-[#16A34A] hover:bg-[#F0FDF4]" : "text-[#888] hover:bg-gray-100"}`}
-                    title={sub.active ? "Actif" : "Inactif"}
-                  >
-                    {sub.active ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                  </button>
-                  <button
-                    onClick={() => { setEditing(sub); setShowForm(true); }}
-                    className="p-2 rounded-lg hover:bg-[#EEF2FF] text-[#1A56DB] transition"
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => { if (confirm("Supprimer ce sous-service ?")) deleteSubService(sub.id); }}
-                    className="p-2 rounded-lg hover:bg-red-50 text-red-500 transition"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  {/* Actions */}
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button onClick={() => handleToggle(sub)} disabled={togglingId === sub.id}
+                      title={sub.active ? "Désactiver" : "Activer"}
+                      className={`p-2 rounded-lg transition disabled:opacity-40 ${sub.active ? "text-[#16A34A] hover:bg-[#F0FDF4]" : "text-[#888] hover:bg-gray-100"}`}>
+                      {togglingId === sub.id
+                        ? <Loader2 className="w-4 h-4 animate-spin" />
+                        : sub.active ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                    </button>
+                    <button onClick={() => { setEditing(sub); setShowForm(true); }}
+                      className="p-2 rounded-lg hover:bg-[#EEF2FF] text-[#1A56DB] transition">
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => setConfirmDelete(sub)} disabled={deletingId === sub.id}
+                      className="p-2 rounded-lg hover:bg-red-50 text-red-400 hover:text-red-600 transition disabled:opacity-40">
+                      {deletingId === sub.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             ))}
           </AnimatePresence>
-
-          {currentSubs.length === 0 && (
-            <div className="text-center py-12 text-[#888]">
-              <ListChecks className="w-10 h-10 mx-auto mb-3 text-[#CCC]" />
-              <p className="font-medium">Aucun sous-service</p>
-              <p className="text-sm mt-1">Cliquez sur "Ajouter" pour créer le premier</p>
-            </div>
-          )}
         </div>
 
-        {/* Reset confirmation */}
+        {/* Confirm delete sub */}
         <AnimatePresence>
-          {confirmReset && (
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          {confirmDelete && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
-              onClick={() => setConfirmReset(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }}
+              onClick={() => setConfirmDelete(null)}>
+              <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }}
                 onClick={e => e.stopPropagation()}
-                className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl"
-              >
-                <h3 className="font-bold text-[#0D1B3E] text-lg mb-2">Réinitialiser ?</h3>
-                <p className="text-sm text-[#888] mb-6">Toutes les modifications seront perdues. Les sous-services par défaut seront restaurés.</p>
+                className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+                <h3 className="font-bold text-[#0D1B3E] text-lg mb-2">Supprimer ce sous-service ?</h3>
+                <p className="text-sm text-[#888] mb-5">
+                  <strong className="text-[#374151]">"{confirmDelete.title}"</strong> sera supprimé définitivement.
+                </p>
                 <div className="flex gap-3">
-                  <button onClick={() => setConfirmReset(false)} className="flex-1 py-2.5 rounded-lg border border-[#E5E7EB] text-sm font-medium hover:bg-gray-50">Annuler</button>
-                  <button onClick={() => { resetToDefaults(); setConfirmReset(false); }} className="flex-1 py-2.5 rounded-lg bg-red-500 text-white text-sm font-bold hover:bg-red-600">Réinitialiser</button>
+                  <button onClick={() => setConfirmDelete(null)}
+                    className="flex-1 py-2.5 rounded-lg border border-[#E5E7EB] text-sm font-medium hover:bg-gray-50">Annuler</button>
+                  <button onClick={() => handleDelete(confirmDelete)}
+                    className="flex-1 py-2.5 rounded-lg bg-red-500 text-white text-sm font-bold hover:bg-red-600">Supprimer</button>
                 </div>
               </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Form modal */}
+        {/* Confirm reset */}
         <AnimatePresence>
-          {showForm && (
-            <SubServiceForm
-              subService={editing}
-              parentSlug={activeTab}
-              onSave={handleSave}
-              onClose={() => { setShowForm(false); setEditing(null); }}
-            />
+          {confirmReset && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
+              onClick={() => setConfirmReset(false)}>
+              <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }}
+                onClick={e => e.stopPropagation()}
+                className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+                <h3 className="font-bold text-[#0D1B3E] text-lg mb-2">Supprimer tous les sous-services ?</h3>
+                <p className="text-sm text-[#888] mb-5">
+                  Tous les sous-services de <strong className="text-[#374151]">"{currentService?.title}"</strong> seront supprimés définitivement.
+                </p>
+                <div className="flex gap-3">
+                  <button onClick={() => setConfirmReset(false)}
+                    className="flex-1 py-2.5 rounded-lg border border-[#E5E7EB] text-sm font-medium hover:bg-gray-50">Annuler</button>
+                  <button onClick={handleReset}
+                    className="flex-1 py-2.5 rounded-lg bg-red-500 text-white text-sm font-bold hover:bg-red-600">Supprimer tout</button>
+                </div>
+              </motion.div>
+            </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Sub-service form modal */}
+        <SubServiceFormModal
+          open={showForm}
+          subService={editing}
+          services={services}
+          defaultServiceId={activeTab ?? undefined}
+          onSave={handleSave}
+          onClose={() => { setShowForm(false); setEditing(null); }}
+        />
       </motion.div>
     </AdminLayout>
-  );
-};
-
-// ─── Form Modal ───
-interface FormProps {
-  subService: AdminSubService | null;
-  parentSlug: string;
-  onSave: (data: AdminSubService) => void;
-  onClose: () => void;
-}
-
-const emptyForm = (parentSlug: string): AdminSubService => ({
-  id: "",
-  parentSlug,
-  title: "",
-  slug: "",
-  desc: "",
-  longDesc: "",
-  image: "",
-  prestations: [""],
-  sections: [{ title: "", text: "" }],
-  active: true,
-  order: 0,
-});
-
-const SubServiceForm = ({ subService, parentSlug, onSave, onClose }: FormProps) => {
-  const [form, setForm] = useState<AdminSubService>(
-    subService || emptyForm(parentSlug)
-  );
-  const [activeSection, setActiveSection] = useState<"general" | "prestations" | "sections" | "seo">("general");
-
-  const autoSlug = (title: string) =>
-    title.toLowerCase()
-      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-
-  const updateField = (field: string, value: any) => {
-    setForm(prev => {
-      const updated = { ...prev, [field]: value };
-      if (field === "title" && !subService) {
-        updated.slug = autoSlug(value);
-      }
-      return updated;
-    });
-  };
-
-  // Prestations
-  const addPrestation = () => setForm(prev => ({ ...prev, prestations: [...prev.prestations, ""] }));
-  const removePrestation = (i: number) => setForm(prev => ({ ...prev, prestations: prev.prestations.filter((_, idx) => idx !== i) }));
-  const updatePrestation = (i: number, val: string) => setForm(prev => ({
-    ...prev, prestations: prev.prestations.map((p, idx) => idx === i ? val : p)
-  }));
-
-  // Sections
-  const addSection = () => setForm(prev => ({ ...prev, sections: [...(prev.sections || []), { title: "", text: "" }] }));
-  const removeSection = (i: number) => setForm(prev => ({ ...prev, sections: (prev.sections || []).filter((_, idx) => idx !== i) }));
-  const updateSection = (i: number, field: "title" | "text", val: string) => setForm(prev => ({
-    ...prev, sections: (prev.sections || []).map((s, idx) => idx === i ? { ...s, [field]: val } : s)
-  }));
-
-  const handleSubmit = () => {
-    if (!form.title.trim() || !form.slug.trim()) return;
-    const cleaned = {
-      ...form,
-      prestations: form.prestations.filter(p => p.trim()),
-      sections: (form.sections || []).filter(s => s.title.trim() || s.text.trim()),
-    };
-    onSave(cleaned);
-  };
-
-  const tabs = [
-    { key: "general" as const, label: "Général", icon: FileText },
-    { key: "prestations" as const, label: "Prestations", icon: ListChecks },
-    { key: "sections" as const, label: "Sections", icon: ChevronDown },
-  ];
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        onClick={e => e.stopPropagation()}
-        className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[#E5E7EB]">
-          <h2 className="text-lg font-bold text-[#0D1B3E]">
-            {subService ? "Modifier" : "Ajouter"} un sous-service
-          </h2>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex border-b border-[#E5E7EB] px-6">
-          {tabs.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveSection(tab.key)}
-              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition ${
-                activeSection === tab.key
-                  ? "border-[#1A56DB] text-[#1A56DB]"
-                  : "border-transparent text-[#888] hover:text-[#374151]"
-              }`}
-            >
-              <tab.icon className="w-4 h-4" />
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {activeSection === "general" && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider text-[#374151] mb-1 block">Titre *</label>
-                  <input
-                    value={form.title}
-                    onChange={e => updateField("title", e.target.value)}
-                    className="w-full px-3 py-2.5 border border-[#E5E7EB] rounded-lg text-sm focus:ring-2 focus:ring-[#1A56DB]/30 focus:border-[#1A56DB] outline-none"
-                    placeholder="Ex: Débarras Appartement"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider text-[#374151] mb-1 block">Slug *</label>
-                  <input
-                    value={form.slug}
-                    onChange={e => updateField("slug", e.target.value)}
-                    className="w-full px-3 py-2.5 border border-[#E5E7EB] rounded-lg text-sm font-mono focus:ring-2 focus:ring-[#1A56DB]/30 focus:border-[#1A56DB] outline-none"
-                    placeholder="debarras-appartement"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold uppercase tracking-wider text-[#374151] mb-1 block">Description courte</label>
-                <textarea
-                  value={form.desc}
-                  onChange={e => updateField("desc", e.target.value)}
-                  rows={2}
-                  className="w-full px-3 py-2.5 border border-[#E5E7EB] rounded-lg text-sm focus:ring-2 focus:ring-[#1A56DB]/30 focus:border-[#1A56DB] outline-none resize-none"
-                  placeholder="Description en 1-2 phrases pour la liste des services..."
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold uppercase tracking-wider text-[#374151] mb-1 block">Description longue</label>
-                <textarea
-                  value={form.longDesc}
-                  onChange={e => updateField("longDesc", e.target.value)}
-                  rows={4}
-                  className="w-full px-3 py-2.5 border border-[#E5E7EB] rounded-lg text-sm focus:ring-2 focus:ring-[#1A56DB]/30 focus:border-[#1A56DB] outline-none resize-none"
-                  placeholder="Description détaillée affichée sur la page du sous-service..."
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold uppercase tracking-wider text-[#374151] mb-1 block">
-                  <Image className="w-3.5 h-3.5 inline mr-1" />
-                  URL de l'image
-                </label>
-                <input
-                  value={form.image || ""}
-                  onChange={e => updateField("image", e.target.value)}
-                  className="w-full px-3 py-2.5 border border-[#E5E7EB] rounded-lg text-sm focus:ring-2 focus:ring-[#1A56DB]/30 focus:border-[#1A56DB] outline-none"
-                  placeholder="https://images.unsplash.com/..."
-                />
-                {form.image && (
-                  <img src={form.image} alt="Aperçu" className="mt-2 rounded-lg h-32 w-full object-cover border border-[#E5E7EB]" />
-                )}
-              </div>
-            </div>
-          )}
-
-          {activeSection === "prestations" && (
-            <div className="space-y-3">
-              <p className="text-xs text-[#888] mb-2">Points clés affichés dans la sidebar de la page de détail.</p>
-              {form.prestations.map((p, i) => (
-                <div key={i} className="flex gap-2 items-center">
-                  <span className="text-xs text-[#CCC] w-5 text-right shrink-0">{i + 1}.</span>
-                  <input
-                    value={p}
-                    onChange={e => updatePrestation(i, e.target.value)}
-                    className="flex-1 px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm focus:ring-2 focus:ring-[#1A56DB]/30 focus:border-[#1A56DB] outline-none"
-                    placeholder="Ex: Vidage complet studio à T5"
-                  />
-                  <button onClick={() => removePrestation(i)} className="p-1.5 rounded-lg hover:bg-red-50 text-red-400 transition">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-              <button onClick={addPrestation} className="flex items-center gap-2 text-sm text-[#1A56DB] font-medium hover:text-[#1347BE] transition mt-2">
-                <Plus className="w-4 h-4" /> Ajouter une prestation
-              </button>
-            </div>
-          )}
-
-          {activeSection === "sections" && (
-            <div className="space-y-6">
-              <p className="text-xs text-[#888] mb-2">Sections de contenu affichées sous l'image sur la page de détail.</p>
-              {(form.sections || []).map((section, i) => (
-                <div key={i} className="border border-[#E5E7EB] rounded-xl p-4 space-y-3 relative">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#374151] uppercase">Section {i + 1}</span>
-                    <button onClick={() => removeSection(i)} className="p-1 rounded hover:bg-red-50 text-red-400">
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                  <input
-                    value={section.title}
-                    onChange={e => updateSection(i, "title", e.target.value)}
-                    className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm font-semibold focus:ring-2 focus:ring-[#1A56DB]/30 focus:border-[#1A56DB] outline-none"
-                    placeholder="Titre de la section"
-                  />
-                  <textarea
-                    value={section.text}
-                    onChange={e => updateSection(i, "text", e.target.value)}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm focus:ring-2 focus:ring-[#1A56DB]/30 focus:border-[#1A56DB] outline-none resize-none"
-                    placeholder="Contenu de la section..."
-                  />
-                </div>
-              ))}
-              <button onClick={addSection} className="flex items-center gap-2 text-sm text-[#1A56DB] font-medium hover:text-[#1347BE] transition">
-                <Plus className="w-4 h-4" /> Ajouter une section
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="p-6 border-t border-[#E5E7EB] flex justify-end gap-3">
-          <button onClick={onClose} className="px-4 py-2.5 rounded-lg border border-[#E5E7EB] text-sm font-medium hover:bg-gray-50 transition">
-            Annuler
-          </button>
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            onClick={handleSubmit}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#1A56DB] text-white font-bold text-sm hover:bg-[#1347BE] transition"
-          >
-            <Save className="w-4 h-4" /> Enregistrer
-          </motion.button>
-        </div>
-      </motion.div>
-    </motion.div>
   );
 };
 

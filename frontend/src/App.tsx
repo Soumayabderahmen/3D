@@ -14,6 +14,7 @@ import Services from "./pages/Services";
 import ServiceDetail from "./pages/ServiceDetail";
 import SubServiceDetail from "./pages/SubServiceDetail";
 import ServiceSubRoute from "./pages/ServiceSubRoute";
+import ZoneServiceDetail from "./pages/ZoneServiceDetail";
 import ZonesIntervention from "./pages/ZonesIntervention";
 import About from "./pages/About";
 import Devis from "./pages/Devis";
@@ -67,6 +68,7 @@ const App = () => (
               <Route path="/services-debarras" element={<Navigate to="/services" replace />} />
               <Route path="/services/:serviceSlug" element={<ServiceDetail />} />
               <Route path="/services/:serviceSlug/:subSlug" element={<ServiceSubRoute />} />
+              <Route path="/services/:serviceSlug/:zoneSlug/:subServiceSlug" element={<ZoneServiceDetail />} />
               <Route path="/zones-intervention" element={<ZonesIntervention />} />
               <Route path="/qui-sommes-nous" element={<About />} />
               <Route path="/devis" element={<Devis />} />
