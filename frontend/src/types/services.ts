@@ -1,5 +1,6 @@
 // src/types/services.ts
-
+import { useEffect, useState } from "react";
+import api from "../lib/axios";
 export interface ServiceConfig {
   id: number;
   slug: string;
@@ -34,4 +35,17 @@ export interface SubServiceConfig {
 }
 
 export type ServiceFormData = Omit<ServiceConfig, 'id' | 'sub_services_count' | 'sub_services'>;
-export type SubServiceFormData = Omit<SubServiceConfig, 'id' | 'service'>;
+export type SubServiceFormData = Omit<SubServiceConfig, 'id' | 'service'>;export function useServiceConfig() {
+  const [services, setServices] = useState<ServiceConfig[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    api.get<ServiceConfig[]>("/services")
+      .then(res => setServices(res.data))
+      .catch(() => setError("Impossible de charger les services."))
+      .finally(() => setLoading(false));
+  }, []);
+
+  return { services, loading, error };
+}

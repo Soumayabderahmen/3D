@@ -169,7 +169,8 @@ const Contact = () => {
                       </div>
                       <div>
                         <p className="font-semibold text-sm text-foreground">Adresse</p>
-                        <p className="text-xs text-muted-foreground">Lyon et région — 200km</p>
+                        <p className="text-xs text-muted-foreground">24 Avenue Joannés Masset, Lyon 69009
+</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
@@ -212,11 +213,15 @@ const Contact = () => {
                   </div>
                 </div>
                 <div className="bg-card rounded-2xl overflow-hidden shadow-card border border-border h-48">
-                  <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.3!2d2.3488!3d48.8747!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDjCsDUyJzI5LjAiTiAywrAyMCc1NS43IkU!5e0!3m2!1sfr!2sfr!4v1"
-                    width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade" title="3D Services"
-                  />
+             <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2783.089754044001!2d4.797204175965667!3d45.769391471080525!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47f4eb7739aceb79%3A0x19fec750fc143c5!2s24%20Ave.%20Joann%C3%A8s%20Masset%2C%2069009%20Lyon%2C%20France!5e0!3m2!1sfr!2stn!4v1777464599413!5m2!1sfr!2stn" 
+  width="100%"
+  height="100%"
+  style={{ border: 0 }}
+  allowFullScreen
+  loading="lazy"
+  referrerPolicy="no-referrer-when-downgrade"
+  title="3D Services"
+/>
                 </div>
               </div>
             </SectionReveal>

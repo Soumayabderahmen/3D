@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { GripVertical, ArrowRight, ExternalLink } from "lucide-react";
-import SectionReveal from "@/components/SectionReveal";
+import SectionReveal from "../components/SectionReveal";
 
 interface SliderData {
   label: string;

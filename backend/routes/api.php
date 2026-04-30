@@ -37,6 +37,7 @@ Route::post('/contact', [ContactController::class, 'store'])
 Route::post('/devis', [DevisController::class, 'store'])
     ->middleware('throttle:5,1');
     Route::get('/actualites', [ActualiteController::class, 'publicIndex']);
+Route::get('/services', [ServiceController::class, 'publicIndex']);
 
 // Routes admin (protégées par Sanctum ou autre guard)
 Route::middleware('auth:sanctum')->group(function () {

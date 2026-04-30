@@ -1,14 +1,14 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Check, Zap, Phone, ArrowRight, ChevronRight } from "lucide-react";
-import Layout from "@/components/layout/Layout";
-import SectionReveal from "@/components/SectionReveal";
-import BeforeAfterGrid from "@/components/BeforeAfterGrid";
-import FinalCTA from "@/components/home/FinalCTA";
-import { SERVICES, getService, ARRONDISSEMENTS_LYON, VILLES_LYON } from "@/data/services";
-import { getStoredSubServices } from "@/hooks/useServicesData";
-import SEOHead from "@/components/SEOHead";
-import { getServiceJsonLd, getBreadcrumbJsonLd } from "@/data/seo";
+import Layout from "../components/layout/Layout";
+import SectionReveal from "../components/SectionReveal";
+import BeforeAfterGrid from "../components/BeforeAfterGrid";
+import FinalCTA from "../components/home/FinalCTA";
+import { SERVICES, getService, ARRONDISSEMENTS_LYON, VILLES_LYON } from "../data/services";
+import { getStoredSubServices } from "../hooks/useServicesData";
+import SEOHead from "../components/SEOHead";
+import { getServiceJsonLd, getBreadcrumbJsonLd } from "../data/seo";
 
 const ServiceDetail = () => {
   const { serviceSlug } = useParams<{ serviceSlug: string }>();

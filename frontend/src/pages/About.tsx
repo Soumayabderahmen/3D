@@ -79,7 +79,7 @@ const About = () => (
               </div>
               <div className="text-center md:text-left">
                 <p className="text-base font-bold text-[hsl(224,47%,15%)]">3D Services</p>
-                <p className="text-[13px] text-[#6B7280]">Fondateur — depuis 2015</p>
+                <p className="text-[13px] text-[#6B7280]">Fondateur : Omar Oueslati</p>
               </div>
               <div className="space-y-2 w-full">
                 {["Équipe professionnelle", "Fondé depuis 2015", "Basé à Lyon (69)", "CERTIFICATION QUALITÉ"].map(b => (
@@ -92,20 +92,44 @@ const About = () => (
             </div>
 
             {/* Right */}
-            <div>
-              <p className="text-[15px] text-[#374151] leading-[1.8] mb-4">
-                Fondée en 2015, 3D Services propose un service de débarras à la fois professionnel, humain et sans jugement. Rigueur, discrétion et sens de l'organisation sont les qualités héritées de notre parcours, appliquées à chaque intervention dans la région lyonnaise.
-              </p>
-              <p className="text-[15px] text-[#374151] leading-[1.8] mb-6">
-                Notre équipe intervient avec soin sur chaque chantier, qu'il s'agisse d'une succession, d'un débarras complet ou d'un débarras d'appartement à Lyon ou dans la région. Chaque mission est traitée avec la même exigence et le même respect.
-              </p>
-              <div className="bg-white border-l-[3px] border-[hsl(221,76%,48%)] rounded-r-lg px-5 py-4">
-                <p className="text-[15px] text-[#374151] italic leading-relaxed">
-                  "Chaque débarras mérite d'être mené avec sérieux, méthode et humanité. Notre rôle est de tout simplifier, une étape souvent difficile à gérer."
-                </p>
-                <p className="text-sm font-bold text-[hsl(224,47%,15%)] mt-2">— L'équipe 3D Services, fondateur</p>
-              </div>
-            </div>
+<div>
+  <p className="text-[15px] text-[#374151] leading-[1.8] mb-4">
+    <strong>3D Services – Débarras, Démolition, Nettoyage et Désamiantage à Lyon et dans un rayon de 200 km (Devis Gratuit & Intervention Rapide)</strong>
+  </p>
+
+  <p className="text-[15px] text-[#374151] leading-[1.8] mb-4">
+    Fondée en 2015, 3D Services est une entreprise spécialisée dans le débarras à Lyon et ses alentours, la démolition intérieure et extérieure, le nettoyage professionnel et le désamiantage sécurisé.
+  </p>
+
+  <p className="text-[15px] text-[#374151] leading-[1.8] mb-4">
+    Nous intervenons rapidement pour tous types de besoins : débarras de maison, appartement, cave, grenier, local commercial ou entrepôt, ainsi que pour les démolitions partielles ou complètes (intérieures et extérieures). Nous réalisons également le nettoyage complet de tous types de surfaces et espaces, ainsi que le traitement et la gestion de l’amiante selon les normes de sécurité en vigueur.
+  </p>
+
+  <p className="text-[15px] text-[#374151] leading-[1.8] mb-6">
+    Notre équipe qualifiée garantit des interventions rapides, efficaces et adaptées à chaque situation, avec devis gratuit, déplacement rapide et service professionnel au meilleur prix.
+  </p>
+
+  <div className="bg-white border-l-[3px] border-[hsl(221,76%,48%)] rounded-r-lg px-5 py-4 mb-4">
+    <p className="text-[15px] text-[#374151] leading-[1.8]">
+      📍 Intervention à Lyon et dans un rayon de 200 km
+    </p>
+    <p className="text-[15px] text-[#374151] leading-[1.8] mt-2">
+      ✔ Débarras urgent et complet (maison, appartement, cave, local)
+      <br />
+      ✔ Démolition intérieure et extérieure sécurisée
+      <br />
+      ✔ Nettoyage professionnel, remise en état et désinfection
+      <br />
+      ✔ Désamiantage sécurisé et conforme aux normes
+      <br />
+      ✔ Intervention rapide, devis gratuit, prix compétitifs
+    </p>
+  </div>
+
+  <p className="text-[15px] text-[#374151] leading-[1.8] italic">
+    3D Services – votre spécialiste du débarras, de la démolition et du nettoyage à Lyon et ses environs. Intervention rapide, service fiable et devis gratuit.
+  </p>
+</div>
           </div>
         </motion.div>
       </div>
@@ -251,7 +275,8 @@ const About = () => (
       <div className="max-w-[700px] mx-auto px-6 text-center">
         <h2 className="text-[28px] font-extrabold text-white mb-8">Besoin d'un devis immédiat ?</h2>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-white/80 text-sm mb-8">
-          <span className="flex items-center gap-2"><MapPin className="w-4 h-4" />Lyon et région — 200km</span>
+          <span className="flex items-center gap-2"><MapPin className="w-4 h-4" />24 Avenue Joannés Masset, Lyon 69009
+</span>
           <a href="tel:0609991736" className="flex items-center gap-2 hover:text-white transition-colors"><Phone className="w-4 h-4" />06 09 99 17 36</a>
           <a href="mailto:3dservicefrance@gmail.com" className="flex items-center gap-2 hover:text-white transition-colors"><Mail className="w-4 h-4" />3dservicefrance@gmail.com</a>
         </div>

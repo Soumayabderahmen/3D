@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Phone, Mail, MessageCircle, MapPin } from "lucide-react";
+import { Phone, Mail, MessageCircle, MapPin ,Sparkles } from "lucide-react";
 import logo3d from "@/assets/logo-3d-services.png";
 
 const serviceLinks = [
@@ -12,6 +12,8 @@ const serviceLinks = [
 const pageLinks = [
   { label: "Accueil", href: "/" },
   { label: "Qui sommes-nous", href: "/qui-sommes-nous" },
+    { label: "Zones", href: "/zones-intervention", icon: Sparkles },
+
   { label: "Devis gratuit", href: "/devis" },
   { label: "Avis clients", href: "/avis-clients" },
   { label: "Contact", href: "/contact" },
@@ -81,7 +83,8 @@ const Footer = () => (
           </h4>
           <div className="space-y-3 text-sm text-primary-foreground/60">
             <p className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 shrink-0" />Lyon et région — 200km
+              <MapPin className="w-4 h-4 shrink-0" />24 Avenue Joannés Masset, Lyon 69009
+
             </p>
             <a href="tel:0609991736" className="flex items-center gap-2 hover:text-primary-foreground transition-colors">
               <Phone className="w-4 h-4 shrink-0" />06 09 99 17 36

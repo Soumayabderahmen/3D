@@ -39,11 +39,11 @@ if (!$response->json('success')) {
     }
 
     // 3️⃣ Déclencher l'event WhatsApp
-    try {
-        event(new DevisCreated($devis));
-    } catch (\Throwable $e) {
-        Log::error('Devis WhatsApp event failed: ' . $e->getMessage(), ['devis_id' => $devis->id]);
-    }
+    // try {
+    //     event(new DevisCreated($devis));
+    // } catch (\Throwable $e) {
+    //     Log::error('Devis WhatsApp event failed: ' . $e->getMessage(), ['devis_id' => $devis->id]);
+    // }
 
     // 4️⃣ Réponse JSON
     return response()->json([

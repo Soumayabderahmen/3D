@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import SectionReveal from "@/components/SectionReveal";
+import SectionReveal from "../../components/SectionReveal";
 
 const reviews = [
   { name: "Nicolas S.", city: "Paris (75)", type: "Débarras appartement", text: "Professionnalisme irréprochable, tarif compétitif, travail dans les délais. Je recommande sans hésiter." },

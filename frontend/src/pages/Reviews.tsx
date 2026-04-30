@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import Layout from "@/components/layout/Layout";
+import Layout from "../components/layout/Layout";
 import { Link } from "react-router-dom";
 import { Star, ArrowRight, Quote } from "lucide-react";
 import { motion } from "framer-motion";
-import SectionReveal from "@/components/SectionReveal";
-import SEOHead from "@/components/SEOHead";
-import { getSEOForPath } from "@/data/seo";
+import SectionReveal from "../components/SectionReveal";
+import SEOHead from "../components/SEOHead";
+import { getSEOForPath } from "../data/seo";
 
 
 const reviews = [

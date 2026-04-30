@@ -5,7 +5,7 @@ const TopBar = () => (
     <div className="container flex items-center justify-between text-xs sm:text-sm text-primary-foreground">
       <span className="hidden md:flex items-center gap-1.5 opacity-80">
         <MapPin className="w-3.5 h-3.5" />
-        Lyon et région — 200km
+24 Avenue Joannés Masset, Lyon 69009
       </span>
       <span className="flex items-center gap-1.5 text-center">
         <Zap className="w-3.5 h-3.5 text-gold" />

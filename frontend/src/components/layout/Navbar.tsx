@@ -8,11 +8,10 @@ const navLinks = [
   { label: "Accueil", href: "/", icon: Home },
   { label: "Services", href: "/services", icon: Sparkles, hasDropdown: true },
   { label: "Tarifs", href: "/tarifs", icon: FileText },
-  { label: "Zones", href: "/zones-intervention", icon: Sparkles },
   { label: "Devis", href: "/devis", icon: FileText },
   { label: "Avis", href: "/avis", icon: Star },
   { label: "Actualités", href: "/actualites", icon: Sparkles },
-  { label: "À propos", href: "/qui-sommes-nous", icon: Home },
+  { label: "Qui sommes-nous", href: "/qui-sommes-nous", icon: Home },
   { label: "Contact", href: "/contact", icon: PhoneIcon },
 ];
 
@@ -58,7 +57,7 @@ const Navbar = () => {
     <header className={`sticky top-0 z-40 transition-all duration-300 ${scrolled ? "bg-card/90 backdrop-blur-xl shadow-premium" : "bg-card"}`}>
       <div className="container flex items-center justify-between h-16 lg:h-18">
         <Link to="/" className="flex items-center gap-2 group">
-          <img src={logo3d} alt="3D Services" className="h-10 w-auto" />
+          <img src={logo3d} alt="3D Services" className="h-20 w-35"  />
         </Link>
 
         {/* Desktop nav */}
