@@ -11,12 +11,14 @@ class StoreServiceRequest extends FormRequest
 
     public function rules(): array
     {
-        $serviceId = $this->route('service')?->id;
+        $service = $this->route('service');
+        $serviceId = is_object($service) ? $service->id : $service;
+        $requiredOnCreate = $serviceId ? 'sometimes' : 'required';
 
         return [
-            'slug'        => ['required', 'string', 'max:100', 'regex:/^[a-z0-9\-]+$/',
+            'slug'        => [$requiredOnCreate, 'string', 'max:100', 'regex:/^[a-z0-9\-]+$/',
                               Rule::unique('services', 'slug')->ignore($serviceId)],
-            'title'       => 'required|string|max:150',
+            'title'       => "{$requiredOnCreate}|string|max:150",
             'icon'        => 'nullable|string|max:100',
             'color_hex'   => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{3,8}$/'],
             'color'       => 'nullable|string|max:100',

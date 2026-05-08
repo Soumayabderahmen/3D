@@ -25,11 +25,14 @@ const SubServiceDetail = () => {
 
   if (error || !subService) return <Navigate to={`/services/${serviceSlug}`} replace />;
 
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
+  const apiBaseUrl = (
+    import.meta.env.VITE_API_BASE_URL ??
+    (import.meta.env.DEV ? "http://localhost:8000" : "")
+  ).replace(/\/$/, "");
   const imageUrl = subService.image
     ? subService.image.startsWith("http")
       ? subService.image
-      : `${apiBaseUrl}${subService.image}`
+      : `${apiBaseUrl}${subService.image.startsWith("/") ? "" : "/"}${subService.image}`
     : null;
 
   return (

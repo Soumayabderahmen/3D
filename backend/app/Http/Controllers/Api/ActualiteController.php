@@ -145,7 +145,7 @@ public function showById($id): JsonResponse
         ]);
 
         $path = $request->file('image')->store('actualites', 'public');
-        $url  = Storage::url($path);
+        $url  = '/storage/'.$path;
 
         return response()->json(['url' => $url]);
     }

@@ -9,11 +9,15 @@ const ServicesGrid = () => {
   if (loading) return null; // ou skeleton si tu veux
   if (error) return <p className="text-center">{error}</p>;
 const iconEmojis: Record<string, string> = {
+  Truck: "🚛",
   Home: "🏠",
   Hammer: "🔨",
+  ShieldAlert: "🛡️",
   AlertTriangle: "⚠️",
   Sparkles: "✨",
-  // ... ajoute les tiens
+  Wrench: "🔧",
+  Trash2: "🗑️",
+  Building2: "🏢",
 };
   return (
     <section className="py-20 bg-card" id="services">

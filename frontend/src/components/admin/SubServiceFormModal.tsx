@@ -33,7 +33,10 @@ const emptyForm = (serviceId: number): SubServiceFormData => ({
 });
 
 // ── Résolution URL image ──────────────────────────────────────────
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000").replace(/\/$/, "");
+const BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL ??
+  (import.meta.env.DEV ? "http://localhost:8000" : "")
+).replace(/\/$/, "");
 
 const resolveImageUrl = (path: string): string => {
   if (!path) return "";

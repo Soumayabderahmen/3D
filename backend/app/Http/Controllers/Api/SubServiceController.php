@@ -110,8 +110,8 @@ class SubServiceController extends Controller
         ]);
 
         $path = $request->file('image')->store('sub-services', 'public');
-        $url = Storage::url($path); // ✅ génère /storage/sub-services/xxx.jpg
-        return response()->json(['url' => $url]);
+
+        return response()->json(['url' => '/storage/'.$path]);
     }
 
     public function showBySlug(string $slug): JsonResponse
@@ -128,7 +128,7 @@ class SubServiceController extends Controller
         'icon'        => $sub->icon,
         'desc'        => $sub->desc,
         'long_desc'   => $sub->long_desc,
-'image' => $sub->image ? Storage::url(str_replace('/storage/', '', $sub->image)) : null,
+        'image'       => $sub->image,
         'prestations' => $sub->prestations,
         'sections'    => $sub->sections,
         'order'       => $sub->order,

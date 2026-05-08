@@ -12,6 +12,17 @@ import { servicesApi, subServicesApi } from "../../services/servicesApi";
 import type { ServiceConfig, SubServiceConfig, SubServiceFormData } from "../../types/services";
 import { toast } from "sonner";
 
+const BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL ??
+  (import.meta.env.DEV ? "http://localhost:8000" : "")
+).replace(/\/$/, "");
+
+const resolveImageUrl = (path: string): string => {
+  if (!path) return "";
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  return `${BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+};
+
 const AdminSubServices = () => {
   const [services, setServices]       = useState<ServiceConfig[]>([]);
   const [subServices, setSubServices] = useState<SubServiceConfig[]>([]);
@@ -198,7 +209,7 @@ const AdminSubServices = () => {
                   {/* Thumbnail */}
 {sub.image ? (
   <img
-    src={`http://localhost:8000${sub.image}`}
+    src={resolveImageUrl(sub.image)}
     alt={sub.title}
     className="w-14 h-10 rounded-lg object-cover shrink-0 border border-[#E5E7EB]"
     onError={(e) => {
