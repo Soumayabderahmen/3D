@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, Mail, MapPin, ChevronDown, Check, Truck, Gem, Euro, AlertTriangle, Facebook, Instagram, Youtube } from "lucide-react";
-import SEOHead from "@/components/SEOHead";
-import { getSEOForPath } from "@/data/seo";
+import SEOHead from "../components/SEOHead";
+import { getSEOForPath } from "../data/seo";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -16,7 +16,7 @@ const Tarifs = () => {
 
   return (
     <div className="min-h-screen bg-background font-sans">
-      <SEOHead title={seo.title} description={seo.description} canonical="/tarifs" />
+      <SEOHead title={seo.title} description={seo.description} canonical="/tarifs" url="/tarifs" />
       {/* HERO */}
       <section className="relative bg-[hsl(224,47%,15%)] py-20 sm:py-28 overflow-hidden">
         <span className="absolute inset-0 flex items-center justify-center text-[120px] sm:text-[180px] font-black text-white/[0.06] tracking-widest select-none pointer-events-none leading-none">

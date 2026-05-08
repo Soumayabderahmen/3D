@@ -5,8 +5,8 @@ import {
   ChevronDown, ChevronUp, Save, RotateCcw, ExternalLink,
   Eye, EyeOff, ArrowRight, BarChart3, Target, Link2
 } from "lucide-react";
-import AdminLayout from "@/components/admin/AdminLayout";
-import { getAllSEOPages, saveSEOForPath, calculateSEOScore, getRedirects, saveRedirects, type PageSEO } from "@/data/seo";
+import AdminLayout from "../../components/admin/AdminLayout";
+import { getAllSEOPages, saveSEOForPath, calculateSEOScore, getRedirects, saveRedirects, type PageSEO } from "../../data/seo";
 import { toast } from "sonner";
 
 const AdminSEO = () => {

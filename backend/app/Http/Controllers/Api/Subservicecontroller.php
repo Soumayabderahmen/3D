@@ -23,7 +23,21 @@ class SubServiceController extends Controller
 
         return response()->json($query->get());
     }
+ public function publicIndex(Request $request): JsonResponse
+{
+    $query = SubService::with('service')->active()->ordered();
 
+    if ($request->filled('service_id')) {
+        $query->where('service_id', $request->service_id);
+    }
+
+    // ← ajouter ce filtre par slug
+    if ($request->filled('service_slug')) {
+        $query->whereHas('service', fn($q) => $q->where('slug', $request->service_slug));
+    }
+
+    return response()->json($query->get());
+}
     /** POST /api/admin/sub-services */
     public function store(StoreSubServiceRequest $request): JsonResponse
     {
@@ -99,4 +113,31 @@ class SubServiceController extends Controller
         $url = Storage::url($path); // ✅ génère /storage/sub-services/xxx.jpg
         return response()->json(['url' => $url]);
     }
+
+    public function showBySlug(string $slug): JsonResponse
+{
+    $sub = SubService::with('service')
+        ->where('slug', $slug)
+        ->where('active', true)
+        ->firstOrFail();
+
+    return response()->json([
+        'id'          => $sub->id,
+        'slug'        => $sub->slug,
+        'title'       => $sub->title,
+        'icon'        => $sub->icon,
+        'desc'        => $sub->desc,
+        'long_desc'   => $sub->long_desc,
+'image' => $sub->image ? Storage::url(str_replace('/storage/', '', $sub->image)) : null,
+        'prestations' => $sub->prestations,
+        'sections'    => $sub->sections,
+        'order'       => $sub->order,
+        'active'      => $sub->active,
+        'service'     => [
+            'id'    => $sub->service->id,
+            'slug'  => $sub->service->slug,
+            'title' => $sub->service->title,
+        ],
+    ]);
+}
 }

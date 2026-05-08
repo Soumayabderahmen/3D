@@ -5,8 +5,10 @@ use App\Http\Controllers\Api\ChatbotConfigController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\DevisController;
 use App\Http\Controllers\Api\FaqController;
+use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\SubServiceController;
+use App\Http\Controllers\Api\ZoneController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -27,7 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar']);
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
 
-    // FAQs
+
     Route::apiResource('faqs', FaqController::class);
     Route::patch('/faqs/{faq}/toggle', [FaqController::class, 'toggle']);
     Route::post('/faqs/reorder', [FaqController::class, 'reorder']);
@@ -37,8 +39,16 @@ Route::post('/contact', [ContactController::class, 'store'])
 Route::post('/devis', [DevisController::class, 'store'])
     ->middleware('throttle:5,1');
     Route::get('/actualites', [ActualiteController::class, 'publicIndex']);
+Route::get('/actualites/{id}', [ActualiteController::class, 'showById']);
 Route::get('/services', [ServiceController::class, 'publicIndex']);
-
+Route::get('/reviews/sync', [ReviewController::class, 'sync']);
+Route::get('/reviews',      [ReviewController::class, 'index']);
+Route::get('/sub-services', [SubServiceController::class, 'publicIndex']);
+Route::get('/services/{slug}/zones', [ZoneController::class, 'byService']);
+Route::get('/services/{slug}/zones/{zoneSlug}', [ZoneController::class, 'show']);
+Route::get('/services/{slug}/resolve/{subSlug}', [ZoneController::class, 'resolve']);
+Route::get('/sub-services/{slug}', [SubServiceController::class, 'showBySlug']);
+Route::get('/zones', [ZoneController::class, 'index']);
 // Routes admin (protégées par Sanctum ou autre guard)
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/contacts', [ContactController::class, 'index']);

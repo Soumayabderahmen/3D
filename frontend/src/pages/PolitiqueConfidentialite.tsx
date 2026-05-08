@@ -1,11 +1,11 @@
-import Layout from "@/components/layout/Layout";
-import SEOHead from "@/components/SEOHead";
-import { getSEOForPath } from "@/data/seo";
+import Layout from "../components/layout/Layout";
+import SEOHead from "../components/SEOHead";
+import { getSEOForPath } from "../data/seo";
 
 
 const PolitiqueConfidentialite = () => (
   <Layout>
-      <SEOHead {...getSEOForPath("/politique-de-confidentialite")} canonical="/politique-de-confidentialite" />
+      <SEOHead {...getSEOForPath("/politique-de-confidentialite")} canonical="/politique-de-confidentialite"  url="/politique-de-confidentialite"/>
     <section className="py-16 bg-background">
       <div className="container max-w-3xl">
         <h1 className="text-3xl font-display font-bold text-foreground mb-8">Politique de Confidentialité</h1>

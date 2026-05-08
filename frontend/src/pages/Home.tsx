@@ -12,12 +12,20 @@ import FAQ from "../components/home/FAQ";
 import FinalCTA from "../components/home/FinalCTA";
 import SEOHead from "../components/SEOHead";
 import { getSEOForPath, getLocalBusinessJsonLd } from "../data/seo";
-
 const Home = () => {
   const seo = getSEOForPath("/");
   return (
     <Layout>
-      <SEOHead title={seo.title} description={seo.description} canonical="/" jsonLd={getLocalBusinessJsonLd()} />
+<SEOHead
+  title={seo.title}
+  description={seo.description}
+  canonical="/"
+  url="/"
+/>
+
+<script type="application/ld+json">
+  {JSON.stringify(getLocalBusinessJsonLd())}
+</script>
       <HeroSlider />
     <KeyFigures />
     

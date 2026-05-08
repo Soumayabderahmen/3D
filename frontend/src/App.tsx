@@ -76,7 +76,7 @@ const App = () => (
               <Route path="/avis-clients" element={<Navigate to="/avis" replace />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/actualites" element={<Actualites />} />
-              <Route path="/actualites/:slug" element={<ActualiteDetail />} />
+              <Route path="/actualites/:id" element={<ActualiteDetail />} />
               <Route path="/mentions-legales" element={<MentionsLegales />} />
               <Route path="/politique-de-confidentialite" element={<PolitiqueConfidentialite />} />
               {/* Admin */}

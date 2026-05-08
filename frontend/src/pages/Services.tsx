@@ -1,74 +1,65 @@
-import Layout from "@/components/layout/Layout";
+import Layout from "../components/layout/Layout";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Building2, Heart, Warehouse, Hammer, Wind, Building, AlertTriangle, Recycle, Leaf, ArrowRight, Zap, Clock, Shield, Bath } from "lucide-react";
-import SectionReveal from "@/components/SectionReveal";
-
-import Formulas from "@/components/home/Formulas";
-import ZoneIntervention from "@/components/home/ZoneIntervention";
-import FinalCTA from "@/components/home/FinalCTA";
-import SEOHead from "@/components/SEOHead";
-import { getSEOForPath } from "@/data/seo";
-
-
-const tabs = [
-  {
-    id: "debarras",
-    label: "Débarras",
-    services: [
-      { icon: Home, title: "Débarras Appartement", desc: "Du studio au grand appartement, vidage complet ou partiel à Paris et en IDF.", badge: "Populaire", badgeColor: "bg-primary-accent" },
-      { icon: Building2, title: "Vide Maison", desc: "Du cave au grenier, meubles, déchets, encombrants.", badge: null, badgeColor: "" },
-      { icon: Heart, title: "Débarras Succession", desc: "Accompagnement après décès, avec respect et discrétion.", badge: "Spécialisé", badgeColor: "bg-gold" },
-      { icon: Warehouse, title: "Cave & Grenier", desc: "Stockages anciens, objets oubliés, nettoyage inclus.", badge: null, badgeColor: "" },
-      { icon: Building, title: "Box & Garage", desc: "Vidage complet de boxes, garages, parkings.", badge: null, badgeColor: "" },
-      { icon: Leaf, title: "Débarras Jardin", desc: "Enlèvement déchets verts, mobilier extérieur.", badge: null, badgeColor: "" },
-      { icon: AlertTriangle, title: "SOS Débarras", desc: "Intervention d'urgence, disponible 7j/7.", badge: "Urgent", badgeColor: "bg-destructive" },
-    ],
-  },
-  {
-    id: "nettoyage",
-    label: "Nettoyage",
-    services: [
-      { icon: Bath, title: "Nettoyage Appartement", desc: "Nettoyage complet, vitres, sols, cuisines, sanitaires.", badge: "Populaire", badgeColor: "bg-primary-accent" },
-      { icon: Hammer, title: "Fin de Chantier", desc: "Locaux remis à neuf après travaux.", badge: null, badgeColor: "" },
-      { icon: Wind, title: "Syndrome de Diogène", desc: "Intervention spécialisée et confidentielle.", badge: "Spécialisé", badgeColor: "bg-gold" },
-      { icon: Recycle, title: "Nettoyage Insalubre", desc: "Désinfection complète, hygiène garantie.", badge: null, badgeColor: "" },
-    ],
-  },
-  {
-    id: "pro",
-    label: "Entretien Pro",
-    services: [
-      { icon: Building, title: "Local Professionnel", desc: "Bureaux, commerces, entrepôts.", badge: null, badgeColor: "" },
-      { icon: Recycle, title: "Archives Entreprises", desc: "Évacuation et destruction sécurisée de documents.", badge: null, badgeColor: "" },
-      { icon: Building2, title: "Encombrants Entreprises", desc: "Enlèvement encombrants pour entreprises.", badge: null, badgeColor: "" },
-    ],
-  },
-];
+import { ArrowRight, Zap, Clock, Shield, Recycle } from "lucide-react";
+import SectionReveal from "../components/SectionReveal";
+import Formulas from "../components/home/Formulas";
+import ZoneIntervention from "../components/home/ZoneIntervention";
+import FinalCTA from "../components/home/FinalCTA";
+import SEOHead from "../components/SEOHead";
+import { getSEOForPath } from "../data/seo";
+import { useServicesHome } from "../hooks/useServiceHome";
+import { useSubServices } from "../hooks/useSubServices";
 
 const engagements = [
-  { icon: Zap, title: "Rapidité", desc: "Intervention sous 24h à 48h" },
-  { icon: Clock, title: "Devis gratuit en 2h", desc: "Réponse rapide et sans engagement" },
-  { icon: Recycle, title: "Éco-responsable", desc: "Tri sélectif, don, recyclage" },
-  { icon: Shield, title: "Discrétion", desc: "Respect total pour les successions" },
+  { icon: Zap,     title: "Rapidité",           desc: "Intervention sous 24h à 48h" },
+  { icon: Clock,   title: "Devis gratuit en 2h", desc: "Réponse rapide et sans engagement" },
+  { icon: Recycle, title: "Éco-responsable",     desc: "Tri sélectif, don, recyclage" },
+  { icon: Shield,  title: "Discrétion",          desc: "Respect total pour les successions" },
 ];
 
 const processSteps = [
-  { step: "01", title: "Vous appelez", desc: "Ou remplissez le formulaire de devis" },
-  { step: "02", title: "Estimation", desc: "Visite ou estimation sur photos (gratuit)" },
-  { step: "03", title: "Devis en 2h", desc: "Devis détaillé reçu par email" },
-  { step: "04", title: "Intervention", desc: "Planifiée selon votre agenda" },
-  { step: "05", title: "Résultat", desc: "Local impeccable, satisfaction garantie" },
+  { step: "01", title: "Vous appelez",  desc: "Ou remplissez le formulaire de devis" },
+  { step: "02", title: "Estimation",    desc: "Visite ou estimation sur photos (gratuit)" },
+  { step: "03", title: "Devis en 2h",   desc: "Devis détaillé reçu par email" },
+  { step: "04", title: "Intervention",  desc: "Planifiée selon votre agenda" },
+  { step: "05", title: "Résultat",      desc: "Local impeccable, satisfaction garantie" },
 ];
 
+const SkeletonCard = () => (
+  <div className="bg-card rounded-2xl p-6 border border-border animate-pulse space-y-3">
+    <div className="w-12 h-12 rounded-xl bg-muted" />
+    <div className="h-4 bg-muted rounded w-2/3" />
+    <div className="h-3 bg-muted rounded w-full" />
+    <div className="h-3 bg-muted rounded w-4/5" />
+  </div>
+);
+
 const Services = () => {
-  const [activeTab, setActiveTab] = useState("debarras");
-  const currentTab = tabs.find(t => t.id === activeTab)!;
+  const [activeTab, setActiveTab] = useState<string | null>(null);
+
+  // ── Services depuis API ──────────────────────────────────────
+  const { services, loading: loadingServices, error: errorServices } = useServicesHome();
+
+  // Initialise l'onglet actif au premier chargement
+  const activeService = services.find(s => s.slug === activeTab)
+    ?? (services.length > 0 ? services[0] : null);
+
+  // Sync activeTab avec le premier service disponible
+  if (!activeTab && activeService) {
+    setActiveTab(activeService.slug);
+  }
+
+  // ── Sub-services selon service actif ────────────────────────
+  const { subServices, loading: loadingSubs } = useSubServices(activeService?.id);
+
+  const loading = loadingServices || loadingSubs;
 
   return (
     <Layout>
-      <SEOHead {...getSEOForPath("/services")} canonical="/services" />
+      <SEOHead {...getSEOForPath("/services")} canonical="/services" url="/services" />
+
       {/* Hero */}
       <section className="gradient-primary py-20 relative noise-overlay">
         <div className="container relative z-10">
@@ -84,8 +75,7 @@ const Services = () => {
             Solutions complètes de débarras et nettoyage pour particuliers et professionnels
           </p>
           <span className="inline-flex items-center gap-2 mt-6 px-4 py-2 rounded-full glass text-sm text-primary-foreground/80">
-            <Zap className="w-4 h-4 text-secondary" />
-            Devis gratuit en 2h
+            <Zap className="w-4 h-4 text-secondary" /> Devis gratuit en 2h
           </span>
         </div>
       </section>
@@ -94,56 +84,116 @@ const Services = () => {
       <SectionReveal>
         <section className="py-16 bg-surface">
           <div className="container">
-            <div className="flex justify-center gap-2 mb-10 flex-wrap">
-              {tabs.map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => setActiveTab(t.id)}
-                  className={`relative px-5 py-2.5 rounded-full text-sm font-semibold transition-colors ${
-                    activeTab === t.id
-                      ? "bg-primary-accent text-primary-foreground"
-                      : "bg-card text-muted-foreground hover:text-foreground border border-border"
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
 
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.25 }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
-              >
-                {currentTab.services.map((s, i) => (
-                  <motion.div
-                    key={s.title}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    className="relative bg-card rounded-2xl p-6 shadow-card hover:shadow-premium hover:-translate-y-1 transition-all border border-border"
-                  >
-                    {s.badge && (
-                      <span className={`absolute top-4 right-4 px-2.5 py-0.5 rounded-full ${s.badgeColor} text-primary-foreground text-xs font-bold`}>
-                        {s.badge}
-                      </span>
-                    )}
-                    <div className="w-12 h-12 rounded-xl bg-primary-accent/10 flex items-center justify-center mb-4">
-                      <s.icon className="w-6 h-6 text-primary-accent" />
-                    </div>
-                    <h3 className="font-display font-bold text-lg text-foreground mb-2">{s.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed mb-4">{s.desc}</p>
-                    <Link to="/devis" className="inline-flex items-center gap-1 text-sm font-semibold text-primary-accent hover:gap-2 transition-all">
-                      En savoir plus <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </motion.div>
+            {/* Tabs */}
+            {loadingServices ? (
+              <div className="flex justify-center gap-2 mb-10 flex-wrap">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="h-10 w-28 bg-muted rounded-full animate-pulse" />
                 ))}
-              </motion.div>
-            </AnimatePresence>
+              </div>
+            ) : (
+              <div className="flex justify-center gap-2 mb-10 flex-wrap">
+                {services.filter(s => s.active).map(s => (
+                  <button
+                    key={s.slug}
+                    onClick={() => setActiveTab(s.slug)}
+                    className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-colors ${
+                      activeTab === s.slug
+                        ? "bg-primary-accent text-primary-foreground"
+                        : "bg-card text-muted-foreground hover:text-foreground border border-border"
+                    }`}
+                  >
+                    {s.title}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Erreur */}
+            {errorServices && (
+              <p className="text-center text-destructive text-sm mb-6">{errorServices}</p>
+            )}
+
+            {/* Grid */}
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {[1, 2, 3, 4, 5, 6].map(i => <SkeletonCard key={i} />)}
+              </div>
+            ) : (
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab ?? ""}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.25 }}
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+                >
+                  {/* Carte service principal */}
+                  {activeService && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="relative bg-card rounded-2xl p-6 shadow-card hover:shadow-premium hover:-translate-y-1 transition-all border border-border"
+                    >
+                      {activeService.badge && (
+                        <span
+                          className="absolute top-4 right-4 px-2.5 py-0.5 rounded-full text-primary-foreground text-xs font-bold"
+                          style={{ backgroundColor: activeService.color_hex }}
+                        >
+                          {activeService.badge}
+                        </span>
+                      )}
+                      <div
+                        className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+                        style={{ backgroundColor: activeService.color_hex + "20" }}
+                      >
+                        <span className="text-xl font-bold" style={{ color: activeService.color_hex }}>
+                          {activeService.title.charAt(0)}
+                        </span>
+                      </div>
+                      <h3 className="font-display font-bold text-lg text-foreground mb-2">{activeService.title}</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed mb-4">{activeService.short_desc}</p>
+                      <Link
+                        to={`/services/${activeService.slug}`}
+                        className="inline-flex items-center gap-1 text-sm font-semibold text-primary-accent hover:gap-2 transition-all"
+                      >
+                        En savoir plus <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    </motion.div>
+                  )}
+
+                  {/* Cartes sous-services */}
+                  {subServices.map((sub, i) => (
+                    <motion.div
+                      key={sub.slug}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: (i + 1) * 0.05 }}
+                      className="relative bg-card rounded-2xl p-6 shadow-card hover:shadow-premium hover:-translate-y-1 transition-all border border-border"
+                    >
+                      <div
+                        className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+                        style={{ backgroundColor: activeService?.color_hex + "20" }}
+                      >
+                        <span className="text-xl font-bold" style={{ color: activeService?.color_hex }}>
+                          {sub.title.charAt(0)}
+                        </span>
+                      </div>
+                      <h3 className="font-display font-bold text-lg text-foreground mb-2">{sub.title}</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed mb-4">{sub.desc}</p>
+                      <Link
+                        to={`/services/${activeService?.slug}/${sub.slug}`}
+                        className="inline-flex items-center gap-1 text-sm font-semibold text-primary-accent hover:gap-2 transition-all"
+                      >
+                        En savoir plus <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </AnimatePresence>
+            )}
           </div>
         </section>
       </SectionReveal>

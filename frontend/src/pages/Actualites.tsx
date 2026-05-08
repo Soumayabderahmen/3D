@@ -1,129 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, GripVertical } from "lucide-react";
 import Layout from "../components/layout/Layout";
 import SectionReveal from "../components/SectionReveal";
 import SEOHead from "../components/SEOHead";
 import { getSEOForPath } from "../data/seo";
-
+import api from "../lib/axios";
 
 export interface Article {
-  slug: string;
+  id: string;
   title: string;
-  category: string;
+  service: { id: number; title: string };
   date: string;
-  lieu: string;
+  location: string;
   image: string;
-  imageBefore?: string;
-  imageAfter?: string;
+  image_before?: string;
+  image_after?: string;
   description: string;
 }
-
-export const articles: Article[] = [
-  // === MISSIONS DÉBARRAS ===
-  {
-    slug: "evacuation-dechets-lyon-3",
-    title: "Évacuation de déchets — Lyon 3e",
-    category: "Débarras",
-    date: "Mars 2026",
-    lieu: "Lyon 3e (69003)",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800",
-    imageBefore: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800",
-    imageAfter: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800",
-    description: "Évacuation complète de déchets et encombrants dans un appartement de 70m². Tri sélectif, recyclage et nettoyage inclus.",
-  },
-  {
-    slug: "debarras-nettoyage-appartement-villeurbanne",
-    title: "Débarras et nettoyage d'un appartement — Villeurbanne",
-    category: "Débarras",
-    date: "Février 2026",
-    lieu: "Villeurbanne (69100)",
-    image: "https://images.unsplash.com/photo-1584467735871-8e4e9d979e7d?w=800",
-    imageBefore: "https://images.unsplash.com/photo-1584467735871-8e4e9d979e7d?w=800",
-    imageAfter: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
-    description: "Débarras complet d'un appartement de 55m² suite à une succession. Mobilier, archives et électroménager évacués en une journée.",
-  },
-  {
-    slug: "debarras-encombrants-venissieux",
-    title: "Débarras encombrants — Vénissieux",
-    category: "Débarras",
-    date: "Janvier 2026",
-    lieu: "Vénissieux (69200)",
-    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800",
-    imageBefore: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800",
-    imageAfter: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800",
-    description: "Enlèvement d'encombrants dans un garage de 40m² : vieux meubles, électroménager, matériaux divers. Intervention rapide.",
-  },
-  {
-    slug: "debarras-cave-caluire",
-    title: "Vidage de cave — Caluire-et-Cuire",
-    category: "Débarras",
-    date: "Décembre 2025",
-    lieu: "Caluire-et-Cuire (69300)",
-    image: "https://images.unsplash.com/photo-1584467735871-8e4e9d979e7d?w=800",
-    imageBefore: "https://images.unsplash.com/photo-1584467735871-8e4e9d979e7d?w=800",
-    imageAfter: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
-    description: "Débarras d'une cave accumulée depuis 20 ans. Meubles anciens, archives, cartons — tout évacué en une demi-journée.",
-  },
-  // === MISSIONS NETTOYAGE ===
-  {
-    slug: "nettoyage-diogene-lyon-7",
-    title: "Nettoyage syndrome de Diogène — Lyon 7e",
-    category: "Nettoyage",
-    date: "Mars 2026",
-    lieu: "Lyon 7e (69007)",
-    image: "https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=800",
-    description: "Prise en charge complète d'un appartement touché par le syndrome de Diogène. Débarras, désinfection et remise en état.",
-  },
-  {
-    slug: "nettoyage-fin-chantier-bron",
-    title: "Nettoyage fin de chantier — Bron",
-    category: "Nettoyage",
-    date: "Février 2026",
-    lieu: "Bron (69500)",
-    image: "https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=800",
-    description: "Nettoyage complet après rénovation d'un local commercial de 120m². Poussière, résidus de peinture, vitres — tout impeccable.",
-  },
-  {
-    slug: "nettoyage-vitres-creche-villeurbanne",
-    title: "Nettoyage vitres d'une crèche — Villeurbanne",
-    category: "Nettoyage",
-    date: "Janvier 2026",
-    lieu: "Villeurbanne (69100)",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800",
-    description: "Nettoyage professionnel de toutes les vitres intérieures et extérieures d'une crèche municipale. Produits écologiques utilisés.",
-  },
-  {
-    slug: "poncage-carrelage-saint-etienne",
-    title: "Ponçage carrelage professionnel — Saint-Étienne",
-    category: "Nettoyage",
-    date: "Décembre 2025",
-    lieu: "Saint-Étienne (42000)",
-    image: "https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=800",
-    description: "Ponçage et cristallisation de carrelage dans un hall d'immeuble. Résultat brillant et durable.",
-  },
-  // === MISSIONS DÉMOLITION ===
-  {
-    slug: "demolition-cloisons-lyon-6",
-    title: "Démolition cloisons — Lyon 6e",
-    category: "Démolition",
-    date: "Février 2026",
-    lieu: "Lyon 6e (69006)",
-    image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800",
-    description: "Démolition de 3 cloisons pour créer un grand espace ouvert dans un appartement de 90m². Gravats évacués le jour même.",
-  },
-  // === MISSIONS DÉSAMIANTAGE ===
-  {
-    slug: "desamiantage-toiture-lyon-8",
-    title: "Désamiantage toiture — Lyon 8e",
-    category: "Désamiantage",
-    date: "Janvier 2026",
-    lieu: "Lyon 8e (69008)",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800",
-    description: "Retrait de plaques de fibrociment amiantées sur une surface de 50m². Intervention certifiée, rapport de fin de travaux remis.",
-  },
-];
 
 const categories = ["Tous", "Débarras", "Nettoyage", "Démolition", "Désamiantage"];
 
@@ -134,15 +29,89 @@ const categoryColor: Record<string, string> = {
   "Désamiantage": "bg-gold text-primary",
 };
 
+// ✅ Cache en mémoire — persiste tant que la page n'est pas rechargée
+let articlesCache: Article[] | null = null;
+
+const BeforeAfterMini = ({ before, after }: { before: string; after: string }) => {
+  const [pos, setPos] = useState(50);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragging = useRef(false);
+
+  const updatePos = useCallback((clientX: number) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+    setPos((x / rect.width) * 100);
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative w-full h-48 rounded-xl overflow-hidden cursor-grab active:cursor-grabbing select-none"
+      onPointerDown={e => { dragging.current = true; (e.target as HTMLElement).setPointerCapture(e.pointerId); updatePos(e.clientX); }}
+      onPointerMove={e => { if (dragging.current) updatePos(e.clientX); }}
+      onPointerUp={() => { dragging.current = false; }}
+    >
+      <img src={before} alt="Avant" className="absolute inset-0 w-full h-full object-cover" draggable={false} />
+      <img src={after} alt="Après" className="absolute inset-0 w-full h-full object-cover" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }} draggable={false} />
+      <div className="absolute top-0 bottom-0 w-0.5 bg-white z-10" style={{ left: `${pos}%` }}>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white shadow flex items-center justify-center">
+          <GripVertical className="w-4 h-4 text-gray-700" />
+        </div>
+      </div>
+      <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-red-600 text-white text-xs font-bold z-20">AVANT</span>
+      <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-green-600 text-white text-xs font-bold z-20">APRÈS</span>
+    </div>
+  );
+};
+
+// ✅ Skeleton card pendant le chargement
+const SkeletonCard = () => (
+  <div className="rounded-xl border border-border bg-card overflow-hidden animate-pulse">
+    <div className="w-full h-48 bg-muted" />
+    <div className="p-5 space-y-3">
+      <div className="h-4 bg-muted rounded w-3/4" />
+      <div className="h-3 bg-muted rounded w-1/3" />
+      <div className="h-3 bg-muted rounded w-full" />
+      <div className="h-3 bg-muted rounded w-2/3" />
+    </div>
+  </div>
+);
+
 const Actualites = () => {
   const [filter, setFilter] = useState("Tous");
+  // ✅ Initialise directement depuis le cache si dispo
+  const [articles, setArticles] = useState<Article[]>(articlesCache ?? []);
+  const [loading, setLoading] = useState(!articlesCache);
 
-  const filtered = filter === "Tous" ? articles : articles.filter(a => a.category === filter);
+  useEffect(() => {
+    // ✅ Si cache dispo → pas de requête
+    if (articlesCache) return;
+
+    const controller = new AbortController();
+
+    api.get("/actualites", { signal: controller.signal })
+      .then(res => {
+        articlesCache = res.data.data;
+        setArticles(articlesCache!);
+      })
+      .catch(err => {
+        if (err.name !== "CanceledError") {
+          console.error("Erreur lors du chargement des actualités :", err);
+        }
+      })
+      .finally(() => setLoading(false));
+
+    // ✅ Annule la requête si on quitte la page avant la fin
+    return () => controller.abort();
+  }, []);
+
+  const filtered = filter === "Tous" ? articles : articles.filter(a => a.service.title === filter);
 
   return (
     <Layout>
-      <SEOHead {...getSEOForPath("/actualites")} canonical="/actualites" />
-      {/* Hero */}
+      <SEOHead {...getSEOForPath("/actualites")} canonical="/actualites" url="/actualites" />
+
       <section className="gradient-primary py-16">
         <div className="container text-center">
           <h1 className="font-display font-bold text-3xl sm:text-4xl text-primary-foreground mb-3">
@@ -155,7 +124,6 @@ const Actualites = () => {
       <section className="py-16 bg-surface">
         <SectionReveal>
           <div className="container">
-            {/* Filters */}
             <div className="flex justify-center gap-2 mb-10 flex-wrap">
               {categories.map(c => (
                 <button
@@ -168,38 +136,59 @@ const Actualites = () => {
               ))}
             </div>
 
-            {/* Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((a, i) => (
-                <motion.div
-                  key={a.slug}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.08 }}
-                >
-                  <Link
-                    to={`/actualites/${a.slug}`}
-                    className="group block rounded-xl border border-border bg-card overflow-hidden hover:shadow-premium hover:-translate-y-1 transition-all duration-200"
+            {loading ? (
+              // ✅ Skeletons à la place du simple texte
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filtered.map((a, i) => (
+                  <motion.div
+                    key={a.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.08 }}
                   >
-                    <div className="relative aspect-video overflow-hidden">
-                      <img src={a.image} alt={a.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                      <span className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold ${categoryColor[a.category] || "bg-muted text-foreground"}`}>
-                        {a.category}
+                    <Link
+                      to={`/actualites/${a.id}`}
+                      state={{ article: a, allArticles: filtered }}
+                      className="group block rounded-xl border border-border bg-card overflow-hidden hover:shadow-premium hover:-translate-y-1 transition-all duration-200"
+                    >
+                      {a.image_before && a.image_after ? (
+                        <BeforeAfterMini before={a.image_before} after={a.image_after} />
+                      ) : (
+                        <div className="relative aspect-video overflow-hidden">
+                          <img
+                            src={a.image_before || a.image_after || a.image}
+                            alt={a.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+
+                      <span
+                        className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold ${
+                          categoryColor[a.service.title] || "bg-muted text-foreground"
+                        }`}
+                      >
+                        {a.service.title}
                       </span>
-                    </div>
-                    <div className="p-5">
-                      <h3 className="font-bold text-[15px] text-foreground mb-1 line-clamp-2">{a.title}</h3>
-                      <p className="text-xs text-muted-foreground mb-2">{a.lieu} • {a.date}</p>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{a.description}</p>
-                      <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary-accent group-hover:underline">
-                        Lire la suite <ArrowRight className="w-3.5 h-3.5" />
-                      </span>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
+
+                      <div className="p-5">
+                        <h3 className="font-bold text-[15px] text-foreground mb-1 line-clamp-2">{a.title}</h3>
+                        <p className="text-xs text-muted-foreground mb-2">{a.location}</p>
+                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{a.description}</p>
+                        <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary-accent group-hover:underline">
+                          Lire la suite <ArrowRight className="w-3.5 h-3.5" />
+                        </span>
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+            )}
           </div>
         </SectionReveal>
       </section>

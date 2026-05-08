@@ -135,8 +135,11 @@ const Contact = () => {
 
   return (
     <Layout>
-      <SEOHead {...getSEOForPath("/contact")} canonical="/contact" />
-
+<SEOHead
+  {...getSEOForPath("/contact")}
+  canonical="/contact"
+  url="/contact"
+/>
       {/* Hero */}
       <section className="gradient-primary py-16 relative noise-overlay">
         <div className="container relative z-10">
@@ -213,7 +216,7 @@ const Contact = () => {
                   </div>
                 </div>
                 <div className="bg-card rounded-2xl overflow-hidden shadow-card border border-border h-48">
-             <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2783.089754044001!2d4.797204175965667!3d45.769391471080525!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47f4eb7739aceb79%3A0x19fec750fc143c5!2s24%20Ave.%20Joann%C3%A8s%20Masset%2C%2069009%20Lyon%2C%20France!5e0!3m2!1sfr!2stn!4v1777464599413!5m2!1sfr!2stn" 
+             <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5566.159131269944!2d4.800328340019189!3d45.76959566173619!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2d44a8057868ff9f%3A0x8aea521c775b529!2s3D%20Services!5e0!3m2!1sfr!2stn!4v1777562421823!5m2!1sfr!2stn" 
   width="100%"
   height="100%"
   style={{ border: 0 }}

@@ -129,7 +129,7 @@ const Devis = () => {
   if (submitted) {
     return (
       <Layout>
-        <SEOHead {...getSEOForPath("/admin/devis")} canonical="/admin/devis" />
+        <SEOHead {...getSEOForPath("/admin/devis")} canonical="/admin/devis" url="/admin/devis" />
         <section className="py-32 bg-card">
           <div className="container text-center max-w-lg">
             <motion.div
@@ -168,7 +168,7 @@ const Devis = () => {
   // ── Rendu principal ───────────────────────────────────────────────
   return (
     <Layout>
-      <SEOHead {...getSEOForPath("/admin/devis")} canonical="/admin/devis" />
+      <SEOHead {...getSEOForPath("/admin/devis")} canonical="/admin/devis" url="/admin/devis" />
 
       {/* Hero */}
       <section className="gradient-primary py-16 relative noise-overlay">

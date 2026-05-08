@@ -1,11 +1,11 @@
-import Layout from "@/components/layout/Layout";
-import SEOHead from "@/components/SEOHead";
-import { getSEOForPath } from "@/data/seo";
+import Layout from "../components/layout/Layout";
+import SEOHead from "../components/SEOHead";
+import { getSEOForPath } from "../data/seo";
 
 
 const MentionsLegales = () => (
   <Layout>
-      <SEOHead {...getSEOForPath("/mentions-legales")} canonical="/mentions-legales" />
+      <SEOHead {...getSEOForPath("/mentions-legales")} canonical="/mentions-legales" url="/mentions-legales" />
     <section className="py-16 bg-background">
       <div className="container max-w-3xl">
         <h1 className="text-3xl font-display font-bold text-foreground mb-8">Mentions Légales</h1>
@@ -17,16 +17,16 @@ const MentionsLegales = () => (
             Siège social : 24 Avenue Joannés Masset, Lyon 69009<br />
             Téléphone : 06 09 99 17 36<br />
             Email : 3dservicefrance@gmail.com<br />
-            Forme juridique : [À compléter]<br />
+            Forme juridique : SARL<br />
             SIRET : [À compléter]<br />
-            Directeur de la publication : [À compléter]
+            Directeur de la publication : Omar Oueslati
           </p>
 
           <h2 className="text-xl font-semibold text-foreground">2. Hébergeur</h2>
           <p>
             Le site est hébergé par :<br />
-            Lovable (Lovable Technologies)<br />
-            Site web : <a href="https://lovable.dev" target="_blank" rel="noopener noreferrer" className="text-primary underline">lovable.dev</a>
+            OVH Cloud <br />
+            Site web : <a href="https://debarras3d.fr" target="_blank" rel="noopener noreferrer" className="text-primary underline">https://debarras3d.fr</a>
           </p>
 
           <h2 className="text-xl font-semibold text-foreground">3. Propriété intellectuelle</h2>

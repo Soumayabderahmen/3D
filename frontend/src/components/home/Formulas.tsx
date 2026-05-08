@@ -10,12 +10,13 @@ const Formulas = () => (
           <div>
             <div className="rounded-xl overflow-hidden shadow-card">
               <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-                <iframe
-  src="https://www.youtube.com/embed/r9-DNqxWek4?start=2"
-                  title="3D Services"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="absolute inset-0 w-full h-full"
+                <video
+                  src="/videos/3d services.mp4"
+                  controls
+                
+                 
+                  playsInline
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
               </div>
             </div>

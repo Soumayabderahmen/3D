@@ -42,7 +42,15 @@ class ActualiteController extends Controller
             ->published()
             ->ordered()
             ->paginate(12);
-
+  $actualites->getCollection()->transform(function ($item) {
+    if ($item->image_before) {
+        $item->image_before = asset($item->image_before); // ne rajoute pas "storage/" si déjà présent
+    }
+    if ($item->image_after) {
+        $item->image_after = asset($item->image_after);
+    }
+    return $item;
+});
         return response()->json($actualites);
     }
 
@@ -66,7 +74,29 @@ class ActualiteController extends Controller
     {
         return response()->json($actualite->load('service'));
     }
+public function showById($id): JsonResponse
+{
+    $actualite = Actualite::with('service')->find($id);
 
+    if (!$actualite) {
+        return response()->json(['message' => 'Not found'], 404);
+    }
+
+    // Corriger les URLs des images avant / après
+    if ($actualite->image_before) {
+        $path = ltrim($actualite->image_before, '/');
+        $path = preg_replace('#^storage/#', '', $path); // supprimer "storage/" du début si présent
+        $actualite->image_before = asset('storage/' . $path);
+    }
+
+    if ($actualite->image_after) {
+        $path = ltrim($actualite->image_after, '/');
+        $path = preg_replace('#^storage/#', '', $path);
+        $actualite->image_after = asset('storage/' . $path);
+    }
+
+    return response()->json($actualite);
+}
     public function update(
         StoreActualiteRequest $request,
         Actualite $actualite

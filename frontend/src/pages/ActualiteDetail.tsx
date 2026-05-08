@@ -1,11 +1,10 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MapPin, Calendar, Clock, CheckCircle, Phone, FileText, ArrowRight } from "lucide-react";
-import Layout from "@/components/layout/Layout";
-import SectionReveal from "@/components/SectionReveal";
-import { articles } from "@/pages/Actualites";
+import { MapPin, Calendar, Clock, CheckCircle, Phone, FileText, ArrowRight, GripVertical } from "lucide-react";
+import Layout from "../components/layout/Layout";
+import SectionReveal from "../components/SectionReveal";
+import type { Article } from "../pages/Actualites";
 import { useState, useRef, useCallback } from "react";
-import { GripVertical } from "lucide-react";
 
 const BeforeAfterLarge = ({ before, after }: { before: string; after: string }) => {
   const [pos, setPos] = useState(50);
@@ -42,8 +41,15 @@ const BeforeAfterLarge = ({ before, after }: { before: string; after: string }) 
 };
 
 const ActualiteDetail = () => {
-  const { slug } = useParams<{ slug: string }>();
-  const article = articles.find(a => a.slug === slug);
+  const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+
+  // ✅ Données passées directement depuis Actualites.tsx via state — zéro fetch
+  const article: Article | undefined = location.state?.article;
+  const allArticles: Article[] = location.state?.allArticles ?? [];
+  const similar = allArticles
+    .filter(a => a.service.id === article?.service.id && a.id !== id)
+    .slice(0, 3);
 
   if (!article) {
     return (
@@ -55,11 +61,41 @@ const ActualiteDetail = () => {
       </Layout>
     );
   }
+const BeforeAfterMini = ({ before, after }: { before: string; after: string }) => {
+  const [pos, setPos] = useState(50);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragging = useRef(false);
 
-  const similar = articles.filter(a => a.category === article.category && a.slug !== article.slug).slice(0, 3);
+  const updatePos = useCallback((clientX: number) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+    setPos((x / rect.width) * 100);
+  }, []);
 
   return (
+    <div
+      ref={containerRef}
+      className="relative w-full h-48 rounded-xl overflow-hidden cursor-grab active:cursor-grabbing select-none"
+      onPointerDown={e => { dragging.current = true; (e.target as HTMLElement).setPointerCapture(e.pointerId); updatePos(e.clientX); }}
+      onPointerMove={e => { if (dragging.current) updatePos(e.clientX); }}
+      onPointerUp={() => { dragging.current = false; }}
+    >
+      <img src={before} alt="Avant" className="absolute inset-0 w-full h-full object-cover" draggable={false} />
+      <img src={after} alt="Après" className="absolute inset-0 w-full h-full object-cover" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }} draggable={false} />
+      <div className="absolute top-0 bottom-0 w-0.5 bg-white z-10" style={{ left: `${pos}%` }}>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white shadow flex items-center justify-center">
+          <GripVertical className="w-4 h-4 text-gray-700" />
+        </div>
+      </div>
+      <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-red-600 text-white text-xs font-bold z-20">AVANT</span>
+      <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-green-600 text-white text-xs font-bold z-20">APRÈS</span>
+    </div>
+  );
+};
+  return (
     <Layout>
+
       {/* Hero */}
       <section className="gradient-primary py-12">
         <div className="container">
@@ -72,44 +108,36 @@ const ActualiteDetail = () => {
           </div>
           <h1 className="font-display font-bold text-2xl sm:text-3xl text-primary-foreground mb-3">{article.title}</h1>
           <div className="flex flex-wrap gap-3">
-            <span className="px-3 py-1 rounded-full bg-primary-foreground/10 text-primary-foreground text-xs font-medium">{article.category}</span>
-            <span className="px-3 py-1 rounded-full bg-primary-foreground/10 text-primary-foreground text-xs font-medium">{article.date}</span>
-            <span className="px-3 py-1 rounded-full bg-primary-foreground/10 text-primary-foreground text-xs font-medium">{article.lieu}</span>
+            <span className="px-3 py-1 rounded-full bg-primary-foreground/10 text-primary-foreground text-xs font-medium">{article.service.title}</span>
+            <span className="px-3 py-1 rounded-full bg-primary-foreground/10 text-primary-foreground text-xs font-medium">{article.location}</span>
           </div>
         </div>
       </section>
 
+      {/* Content */}
       <section className="py-16 bg-surface">
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
+
             {/* Main content */}
             <div className="lg:col-span-3">
-              {article.imageBefore && article.imageAfter ? (
-                <BeforeAfterLarge before={article.imageBefore} after={article.imageAfter} />
+              {article.image_before && article.image_after ? (
+                <BeforeAfterLarge before={article.image_before} after={article.image_after} />
               ) : (
                 <img src={article.image} alt={article.title} className="w-full rounded-xl object-cover" style={{ height: 500 }} />
               )}
 
               <div className="mt-8 prose prose-sm max-w-none text-muted-foreground">
                 <p className="text-base leading-relaxed">{article.description}</p>
-                <p className="mt-4 leading-relaxed">
-                  L'intervention a été réalisée par notre équipe de professionnels expérimentés. Chaque étape du chantier a été soigneusement planifiée pour garantir un résultat optimal dans les meilleurs délais.
-                </p>
-                <p className="mt-4 leading-relaxed">
-                  Notre équipe a procédé au tri sélectif de l'ensemble des éléments présents, en séparant les objets valorisables, recyclables et les déchets à évacuer. Cette approche éco-responsable nous permet de limiter l'impact environnemental.
-                </p>
-                <p className="mt-4 leading-relaxed">
-                  Le client a exprimé sa pleine satisfaction quant à la qualité du travail réalisé, le respect des délais annoncés et la conformité au devis initial. Un nettoyage complet des lieux a été effectué en fin d'intervention.
-                </p>
               </div>
 
               {/* Gallery */}
               <div className="mt-10">
                 <h3 className="font-display font-bold text-lg text-foreground mb-4">Photos du chantier</h3>
                 <div className="grid grid-cols-3 gap-3">
-                  <img src={article.image} alt="" className="rounded-lg w-full aspect-square object-cover" />
-                  {article.imageBefore && <img src={article.imageBefore} alt="" className="rounded-lg w-full aspect-square object-cover" />}
-                  {article.imageAfter && <img src={article.imageAfter} alt="" className="rounded-lg w-full aspect-square object-cover" />}
+                  <img src={article.image}  alt={article.title} className="rounded-lg w-full aspect-square object-cover" />
+                  {article.image_before && <img src={article.image_before}  alt={article.title} className="rounded-lg w-full aspect-square object-cover" />}
+                  {article.image_after && <img src={article.image_after}  alt={article.title} className="rounded-lg w-full aspect-square object-cover" />}
                 </div>
               </div>
             </div>
@@ -139,7 +167,7 @@ const ActualiteDetail = () => {
 
                   <div className="border-t border-border mt-5 pt-5 space-y-3 text-sm">
                     <div className="flex items-center gap-2 text-muted-foreground">
-                      <MapPin className="w-4 h-4 text-primary-accent" /> {article.lieu}
+                      <MapPin className="w-4 h-4 text-primary-accent" /> {article.location}
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Calendar className="w-4 h-4 text-primary-accent" /> {article.date}
@@ -154,40 +182,61 @@ const ActualiteDetail = () => {
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </section>
 
       {/* Similar articles */}
-      {similar.length > 0 && (
-        <SectionReveal>
-          <section className="py-16 bg-card">
-            <div className="container">
-              <h2 className="font-display font-bold text-2xl text-foreground mb-8 text-center">Chantiers similaires</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {similar.map((a, i) => (
-                  <motion.div key={a.slug} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
-                    <Link to={`/actualites/${a.slug}`} className="group block rounded-xl border border-border bg-card overflow-hidden hover:shadow-premium hover:-translate-y-1 transition-all">
-                      <div className="aspect-video overflow-hidden">
-                        <img src={a.image} alt={a.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-bold text-sm text-foreground mb-1">{a.title}</h3>
-                        <p className="text-xs text-muted-foreground">{a.lieu} • {a.date}</p>
-                      </div>
-                    </Link>
-                  </motion.div>
-                ))}
-              </div>
-              <div className="text-center mt-8">
-                <Link to="/actualites" className="inline-flex items-center gap-2 text-primary-accent font-semibold hover:underline">
-                  Voir tous nos chantiers <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </div>
-          </section>
-        </SectionReveal>
-      )}
+      {/* Similar articles */}
+{similar.length > 0 && (
+  <SectionReveal>
+    <section className="py-16 bg-card">
+      <div className="container">
+        <h2 className="font-display font-bold text-2xl text-foreground mb-8 text-center">Chantiers similaires</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {similar.map((a, i) => (
+            <motion.div
+              key={a.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+            >
+              <Link
+                to={`/actualites/${a.id}`}
+                state={{ article: a, allArticles }}
+                className="group block rounded-xl border border-border bg-card overflow-hidden hover:shadow-premium hover:-translate-y-1 transition-all"
+              >
+                {/* ✅ Mini slider avant/après comme dans la liste */}
+                {a.image_before && a.image_after ? (
+                  <BeforeAfterMini before={a.image_before} after={a.image_after} />
+                ) : (
+                  <div className="aspect-video overflow-hidden">
+                    <img
+                      src={a.image_after || a.image_before || a.image}
+                      alt={a.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                )}
+                <div className="p-4">
+                  <h3 className="font-bold text-sm text-foreground mb-1">{a.title}</h3>
+                  <p className="text-xs text-muted-foreground">{a.location}</p>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+        <div className="text-center mt-8">
+          <Link to="/actualites" className="inline-flex items-center gap-2 text-primary-accent font-semibold hover:underline">
+            Voir tous nos chantiers <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  </SectionReveal>
+)}
 
       {/* CTA */}
       <section className="gradient-primary py-16">
@@ -204,6 +253,7 @@ const ActualiteDetail = () => {
           </div>
         </div>
       </section>
+
     </Layout>
   );
 };

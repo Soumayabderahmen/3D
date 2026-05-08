@@ -1,4 +1,13 @@
-// SEO data store with localStorage override from admin
+// ============================================================
+//  data/seo.ts  — SEO data layer pour 3D Services
+// ============================================================
+
+export const SITE_URL = "https://debarras3dservices.fr"; // ← mets ton vrai domaine ici
+
+/* =============================================================
+   TYPES
+============================================================= */
+
 export interface PageSEO {
   path: string;
   title: string;
@@ -7,133 +16,201 @@ export interface PageSEO {
   noindex?: boolean;
   ogImage?: string;
   canonical?: string;
-  redirect?: string;
-  score?: number;
 }
+
+export interface SEOScore {
+  score: number;   // 0-100
+  issues: string[];
+}
+
+/* =============================================================
+   STORAGE KEYS
+============================================================= */
+
+const STORAGE_KEY    = "seo_overrides";
+const REDIRECTS_KEY  = "seo_redirects";
+
+/* =============================================================
+   DEFAULT SEO PAR PAGE
+============================================================= */
 
 const DEFAULT_SEO: Record<string, PageSEO> = {
   "/": {
     path: "/",
-    title: "3D Services — Débarras, Démolition, Nettoyage à Lyon",
-    description: "3D Services : débarras, démolition, désamiantage et nettoyage professionnel à Lyon et région (200km). Devis gratuit en 2h, intervention 7j/7.",
-    keywords: ["débarras lyon", "nettoyage lyon", "démolition lyon", "désamiantage", "vide maison lyon"],
+    title: "3D Services — Débarras, Nettoyage, Démolition & Désamiantage à Lyon",
+    description:
+      "Entreprise spécialisée en débarras, nettoyage, démolition et désamiantage à Lyon et dans un rayon de 200 km. Devis gratuit sous 24 h.",
+    keywords: ["débarras lyon", "nettoyage lyon", "démolition lyon", "désamiantage lyon", "3d services"],
+    ogImage: "/og/home.jpg",
+    canonical: "/",
   },
-  "/services": {
-    path: "/services",
-    title: "Nos Services — Débarras, Démolition, Nettoyage",
-    description: "Découvrez tous nos services : débarras appartement et maison, démolition intérieure, désamiantage, nettoyage professionnel. Intervention Lyon et 200km.",
-    keywords: ["services débarras", "démolition intérieure", "nettoyage professionnel lyon"],
-  },
-  "/tarifs": {
-    path: "/tarifs",
-    title: "Tarifs Débarras & Nettoyage Lyon — Prix Transparents",
-    description: "Tarifs transparents pour débarras et nettoyage à Lyon : 20 à 50€/m³. Débarras gratuit possible si valeur objets. Devis gratuit en 2h.",
-    keywords: ["tarif débarras lyon", "prix nettoyage", "devis gratuit"],
-  },
-  "/devis": {
-    path: "/devis",
-    title: "Devis Gratuit Débarras & Nettoyage Lyon — Réponse en 2h",
-    description: "Demandez votre devis gratuit en ligne pour débarras, démolition ou nettoyage à Lyon. Réponse sous 2h, intervention rapide 7j/7.",
-    keywords: ["devis débarras gratuit", "devis nettoyage lyon", "estimation débarras"],
-  },
+
   "/qui-sommes-nous": {
     path: "/qui-sommes-nous",
-    title: "Qui Sommes-Nous — 3D Services Lyon",
-    description: "3D Services, entreprise de débarras et nettoyage à Lyon depuis 2015. Équipe expérimentée, éco-responsable, intervention rapide dans un rayon de 200km.",
-    keywords: ["entreprise débarras lyon", "3d services", "qui sommes nous"],
+    title: "Qui sommes-nous — 3D Services Lyon",
+    description:
+      "Découvrez 3D Services, entreprise lyonnaise spécialisée en débarras, nettoyage et démolition depuis plus de 10 ans.",
+    keywords: ["3d services", "débarras lyon", "entreprise débarras lyon"],
+    ogImage: "/og/about.jpg",
+    canonical: "/qui-sommes-nous",
   },
+
+  "/services": {
+    path: "/services",
+    title: "Nos services — Débarras, Nettoyage & Démolition Lyon | 3D Services",
+    description:
+      "Découvrez tous nos services : débarras d'appartement, nettoyage industriel, démolition intérieure et désamiantage à Lyon et alentours.",
+    keywords: ["services débarras lyon", "nettoyage professionnel lyon", "démolition lyon"],
+    canonical: "/services",
+  },
+
   "/contact": {
     path: "/contact",
-    title: "Contact — 3D Services Lyon | 06 09 99 17 36",
-    description: "Contactez 3D Services pour vos besoins de débarras et nettoyage à Lyon. Tél: 06 09 99 17 36. Devis gratuit, intervention rapide 7j/7.",
-    keywords: ["contact débarras lyon", "téléphone nettoyage lyon"],
+    title: "Contact — Demandez un devis gratuit | 3D Services Lyon",
+    description:
+      "Contactez 3D Services pour un devis gratuit sous 24 h. Débarras, nettoyage, démolition à Lyon.",
+    keywords: ["contact débarras lyon", "devis gratuit débarras"],
+    canonical: "/contact",
   },
-  "/avis": {
-    path: "/avis",
-    title: "Avis Clients — 3D Services Lyon | 99% Satisfaits",
-    description: "Découvrez les avis de nos clients sur nos services de débarras et nettoyage à Lyon. Plus de 200 interventions réalisées, 99% de clients satisfaits.",
-    keywords: ["avis débarras lyon", "témoignages nettoyage"],
-  },
-  "/actualites": {
-    path: "/actualites",
-    title: "Nos Missions & Réalisations — 3D Services Lyon",
-    description: "Découvrez nos dernières missions de débarras, démolition et nettoyage à Lyon et région. Photos avant/après, comptes-rendus détaillés.",
-    keywords: ["missions débarras lyon", "réalisations nettoyage", "avant après"],
-  },
-  "/zones-intervention": {
-    path: "/zones-intervention",
-    title: "Zones d'Intervention — Lyon et 200km | 3D Services",
-    description: "3D Services intervient à Lyon et dans un rayon de 200km : Grenoble, Saint-Étienne, Valence, Annecy, Chambéry. Tous les arrondissements lyonnais couverts.",
-    keywords: ["zone intervention lyon", "débarras grenoble", "nettoyage saint-étienne"],
-  },
-  "/mentions-legales": {
-    path: "/mentions-legales",
-    title: "Mentions Légales — 3D Services",
-    description: "Mentions légales du site 3D Services. Informations sur l'éditeur, l'hébergeur, la propriété intellectuelle.",
-    keywords: [],
-    noindex: true,
-  },
-  "/politique-de-confidentialite": {
-    path: "/politique-de-confidentialite",
-    title: "Politique de Confidentialité — 3D Services",
-    description: "Politique de confidentialité et de protection des données personnelles de 3D Services. Conformité RGPD.",
-    keywords: [],
-    noindex: true,
+
+  "/devis": {
+    path: "/devis",
+    title: "Devis gratuit — Débarras & Nettoyage Lyon | 3D Services",
+    description:
+      "Obtenez un devis gratuit et sans engagement pour votre débarras, nettoyage ou démolition à Lyon. Réponse rapide sous 24 h.",
+    keywords: ["devis débarras lyon", "devis nettoyage lyon", "devis démolition lyon"],
+    canonical: "/devis",
   },
 };
 
-const STORAGE_KEY = "seo_overrides";
-const REDIRECTS_KEY = "seo_redirects";
+/* =============================================================
+   LECTURE / ÉCRITURE SEO
+============================================================= */
 
-export const getSEOForPath = (path: string): PageSEO => {
+const getOverrides = (): Record<string, Partial<PageSEO>> => {
   try {
-    const overrides = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-    if (overrides[path]) return { ...DEFAULT_SEO[path], ...overrides[path] };
-  } catch {}
-  return DEFAULT_SEO[path] || { path, title: "3D Services", description: "Débarras, démolition, désamiantage et nettoyage à Lyon.", keywords: [] };
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+  } catch {
+    return {};
+  }
 };
 
+/** Récupère le SEO d'une page (override admin + defaults fusionnés) */
+export const getSEOForPath = (path: string): PageSEO => {
+  const overrides = getOverrides();
+  const base: PageSEO = DEFAULT_SEO[path] || {
+    path,
+    title: "3D Services — Débarras Lyon",
+    description: "Débarras et nettoyage professionnel à Lyon",
+    keywords: [],
+    canonical: path,
+  };
+  return overrides[path] ? { ...base, ...overrides[path] } : base;
+};
+
+/** Retourne toutes les pages connues (defaults + overrides) */
 export const getAllSEOPages = (): PageSEO[] => {
-  const overrides = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-  const allPaths = new Set([...Object.keys(DEFAULT_SEO), ...Object.keys(overrides)]);
-  return Array.from(allPaths).map(p => getSEOForPath(p));
+  const overrides = getOverrides();
+  const paths = new Set([...Object.keys(DEFAULT_SEO), ...Object.keys(overrides)]);
+  return Array.from(paths).map(getSEOForPath);
 };
 
-export const saveSEOForPath = (path: string, data: Partial<PageSEO>) => {
-  const overrides = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-  overrides[path] = { ...overrides[path], ...data, path };
+/** Sauvegarde un override admin pour une page */
+export const saveSEOForPath = (path: string, data: Partial<PageSEO>): void => {
+  const overrides = getOverrides();
+  overrides[path] = { ...overrides[path], ...data };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides));
 };
 
-export const getRedirects = (): { from: string; to: string }[] => {
-  return JSON.parse(localStorage.getItem(REDIRECTS_KEY) || "[]");
-};
+/* =============================================================
+   CALCUL DU SCORE SEO
+============================================================= */
 
-export const saveRedirects = (redirects: { from: string; to: string }[]) => {
-  localStorage.setItem(REDIRECTS_KEY, JSON.stringify(redirects));
-};
-
-export const calculateSEOScore = (seo: PageSEO): { score: number; issues: string[] } => {
+export const calculateSEOScore = (page: PageSEO): SEOScore => {
   const issues: string[] = [];
   let score = 100;
 
-  if (!seo.title || seo.title.length < 10) { issues.push("Titre trop court (< 10 car.)"); score -= 15; }
-  if (seo.title && seo.title.length > 60) { issues.push("Titre trop long (> 60 car.)"); score -= 10; }
-  if (!seo.description || seo.description.length < 50) { issues.push("Description trop courte (< 50 car.)"); score -= 15; }
-  if (seo.description && seo.description.length > 160) { issues.push("Description trop longue (> 160 car.)"); score -= 10; }
-  if (!seo.keywords || seo.keywords.length === 0) { issues.push("Aucun mot-clé défini"); score -= 10; }
-  if (!seo.canonical) { issues.push("URL canonique non définie"); score -= 5; }
-  if (!seo.ogImage) { issues.push("Image OG non définie"); score -= 5; }
+  // Title
+  if (!page.title || page.title.trim() === "") {
+    issues.push("Titre manquant");
+    score -= 30;
+  } else if (page.title.length < 30) {
+    issues.push("Titre trop court (< 30 caractères)");
+    score -= 10;
+  } else if (page.title.length > 60) {
+    issues.push("Titre trop long (> 60 caractères) — sera tronqué dans Google");
+    score -= 10;
+  }
+
+  // Description
+  if (!page.description || page.description.trim() === "") {
+    issues.push("Description manquante");
+    score -= 25;
+  } else if (page.description.length < 80) {
+    issues.push("Description trop courte (< 80 caractères)");
+    score -= 10;
+  } else if (page.description.length > 160) {
+    issues.push("Description trop longue (> 160 caractères) — sera tronquée");
+    score -= 5;
+  }
+
+  // Keywords
+  if (!page.keywords || page.keywords.length === 0) {
+    issues.push("Aucun mot-clé défini");
+    score -= 10;
+  } else if (page.keywords.length < 3) {
+    issues.push("Peu de mots-clés (recommandé : 3+)");
+    score -= 5;
+  }
+
+  // OG Image
+  if (!page.ogImage) {
+    issues.push("Pas d'image Open Graph définie");
+    score -= 10;
+  }
+
+  // Canonical
+  if (!page.canonical) {
+    issues.push("URL canonique non définie");
+    score -= 10;
+  }
+
+  // Noindex warning (pas une erreur, juste info)
+  if (page.noindex) {
+    issues.push("Page exclue de l'indexation (noindex activé)");
+    score -= 5;
+  }
 
   return { score: Math.max(0, score), issues };
 };
 
-// JSON-LD generators
+/* =============================================================
+   REDIRECTIONS 301
+============================================================= */
+
+export const getRedirects = (): { from: string; to: string }[] => {
+  try {
+    return JSON.parse(localStorage.getItem(REDIRECTS_KEY) || "[]");
+  } catch {
+    return [];
+  }
+};
+
+export const saveRedirects = (redirects: { from: string; to: string }[]): void => {
+  localStorage.setItem(REDIRECTS_KEY, JSON.stringify(redirects));
+};
+
+/* =============================================================
+   JSON-LD SCHEMAS
+============================================================= */
+
+/** LocalBusiness — à injecter sur toutes les pages */
 export const getLocalBusinessJsonLd = () => ({
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   name: "3D Services",
-  image: "https://debarras3dservices.lovable.app/logo-3d-services.png",
+  image: `${SITE_URL}/logo.png`,
+  url: SITE_URL,
   telephone: "+33609991736",
   email: "3dservicefrance@gmail.com",
   address: {
@@ -143,45 +220,77 @@ export const getLocalBusinessJsonLd = () => ({
     postalCode: "69009",
     addressCountry: "FR",
   },
-  geo: { "@type": "GeoCoordinates", latitude: 45.7716, longitude: 4.8005 },
-  url: "https://debarras3dservices.lovable.app",
-  openingHoursSpecification: {
-    "@type": "OpeningHoursSpecification",
-    dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-    opens: "07:30",
-    closes: "20:00",
+  areaServed: {
+    "@type": "GeoCircle",
+    geoMidpoint: {
+      "@type": "GeoCoordinates",
+      latitude: 45.764043,
+      longitude: 4.835659,
+    },
+    geoRadius: "200000",
   },
-  areaServed: { "@type": "GeoCircle", geoMidpoint: { "@type": "GeoCoordinates", latitude: 45.7578, longitude: 4.8320 }, geoRadius: "200000" },
   priceRange: "€€",
+  openingHoursSpecification: [
+    {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      opens: "08:00",
+      closes: "18:00",
+    },
+  ],
 });
 
-export const getServiceJsonLd = (name: string, description: string, url: string) => ({
+/** Service — pour chaque page de sous-service */
+export const getServiceJsonLd = (
+  name: string,
+  description: string,
+  url: string
+) => ({
   "@context": "https://schema.org",
   "@type": "Service",
   name,
   description,
-  provider: { "@type": "LocalBusiness", name: "3D Services" },
-  areaServed: { "@type": "City", name: "Lyon" },
-  url: `https://debarras3dservices.lovable.app${url}`,
+  provider: {
+    "@type": "LocalBusiness",
+    name: "3D Services",
+    url: SITE_URL,
+  },
+  areaServed: "Lyon",
+  url: `${SITE_URL}${url}`,
 });
 
-export const getBreadcrumbJsonLd = (items: { name: string; url: string }[]) => ({
+/** BreadcrumbList — navigation structurée */
+export const getBreadcrumbJsonLd = (
+  items: { name: string; url: string }[]
+) => ({
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: items.map((item, i) => ({
     "@type": "ListItem",
     position: i + 1,
     name: item.name,
-    item: `https://debarras3dservices.lovable.app${item.url}`,
+    item: `${SITE_URL}${item.url}`,
   })),
 });
 
+/** FAQPage — pour les pages avec FAQ */
 export const getFAQJsonLd = (faqs: { question: string; answer: string }[]) => ({
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  mainEntity: faqs.map(f => ({
+  mainEntity: faqs.map((f) => ({
     "@type": "Question",
     name: f.question,
-    acceptedAnswer: { "@type": "Answer", text: f.answer },
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: f.answer,
+    },
   })),
+});
+
+/** WebSite avec SearchAction — pour la home */
+export const getWebSiteJsonLd = () => ({
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "3D Services",
+  url: SITE_URL,
 });

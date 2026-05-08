@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useEffect } from "react";
-import Layout from "@/components/layout/Layout";
-import SEOHead from "@/components/SEOHead";
+import Layout from "../components/layout/Layout";
+import SEOHead from "../components/SEOHead";
 import { Home, ArrowLeft, Phone } from "lucide-react";
 
 const NotFound = () => {
@@ -13,8 +13,13 @@ const NotFound = () => {
 
   return (
     <Layout>
-      <SEOHead title="Page introuvable" description="La page que vous recherchez n'existe pas ou a été déplacée." noindex />
-      <section className="py-24 bg-surface">
+<SEOHead
+  title="Page introuvable"
+  description="La page que vous recherchez n'existe pas ou a été déplacée."
+  noindex={true}
+  canonical="/404"
+  url="/404"
+/>      <section className="py-24 bg-surface">
         <div className="container max-w-xl text-center">
           <p className="text-8xl font-black text-primary-accent mb-4">404</p>
           <h1 className="font-display text-2xl font-bold text-foreground mb-3">Page introuvable</h1>
