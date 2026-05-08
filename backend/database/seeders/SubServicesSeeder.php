@@ -647,9 +647,37 @@ class SubServicesSeeder extends Seeder
         ];
 
         foreach ($subServices as $data) {
-            SubService::create($data);
+            SubService::create([
+                'service_id' => $data['service_id'],
+                'slug' => $data['slug'],
+                'title' => $data['title'] ?? $data['name'],
+                'icon' => $data['icon'] ?? '📦',
+                'desc' => $data['desc'] ?? $data['short_description'] ?? null,
+                'long_desc' => $data['long_desc'] ?? $data['description'] ?? null,
+                'image' => $data['image'] ?? null,
+                'prestations' => $this->decodeJsonField($data['prestations'] ?? $data['features'] ?? []),
+                'sections' => $this->decodeJsonField($data['sections'] ?? $data['content_blocks'] ?? []),
+                'order' => $data['order'] ?? $data['sort_order'] ?? 0,
+                'active' => $data['active'] ?? $data['is_active'] ?? true,
+                'created_at' => $data['created_at'] ?? now(),
+                'updated_at' => $data['updated_at'] ?? now(),
+            ]);
         }
 
         $this->command->info('✅ ' . count($subServices) . ' sous-services créés avec succès.');
+    }
+    private function decodeJsonField(mixed $value): array
+    {
+        if (is_array($value)) {
+            return $value;
+        }
+
+        if (!is_string($value) || trim($value) === '') {
+            return [];
+        }
+
+        $decoded = json_decode($value, true);
+
+        return is_array($decoded) ? $decoded : [];
     }
 }

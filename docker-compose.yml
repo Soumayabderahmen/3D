@@ -1,0 +1,117 @@
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: 3dservices-nginx
+    restart: unless-stopped
+    depends_on:
+      - frontend
+      - backend-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - nginx_certs:/etc/nginx/certs
+      - nginx_certs:/etc/letsencrypt:ro
+      - nginx_acme:/var/www/certbot
+    networks:
+      - 3dservices-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+        VITE_RECAPTCHA_SITE_KEY: ${VITE_RECAPTCHA_SITE_KEY:-}
+    container_name: 3dservices-frontend
+    restart: unless-stopped
+    expose:
+      - "80"
+    networks:
+      - 3dservices-network
+
+  backend-nginx:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.nginx
+    container_name: 3dservices-backend-nginx
+    restart: unless-stopped
+    depends_on:
+      - backend
+    expose:
+      - "80"
+    volumes:
+      - ./docker/nginx/backend.conf:/etc/nginx/conf.d/default.conf:ro
+      - backend_storage:/var/www/html/storage
+    networks:
+      - 3dservices-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: 3dservices-backend
+    restart: unless-stopped
+    env_file:
+      - ./.env.docker
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: ${APP_URL:-https://debarras3d.fr}
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      SESSION_DRIVER: database
+      CACHE_STORE: database
+      QUEUE_CONNECTION: database
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    expose:
+      - "9000"
+    volumes:
+      - backend_storage:/var/www/html/storage
+    networks:
+      - 3dservices-network
+
+  postgres:
+    build:
+      context: ./docker/postgres
+      dockerfile: Dockerfile
+    container_name: 3dservices-postgres
+    restart: unless-stopped
+    env_file:
+      - ./.env.docker
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - 3dservices-network
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: 3dservices-certbot
+    profiles:
+      - ssl
+    volumes:
+      - nginx_certs:/etc/letsencrypt
+      - nginx_acme:/var/www/certbot
+    networks:
+      - 3dservices-network
+
+volumes:
+  postgres_data:
+  backend_storage:
+  nginx_certs:
+  nginx_acme:
+
+networks:
+  3dservices-network:
+    driver: bridge

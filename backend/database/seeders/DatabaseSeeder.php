@@ -9,6 +9,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([AdminSeeder::class,
          ChatbotConfigSeeder::class,
+         ServicesSeeder::class,
          SubServicesSeeder::class,
         ZoneSeeder::class,]);
     }

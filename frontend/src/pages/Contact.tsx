@@ -12,7 +12,7 @@ import SEOHead from "../components/SEOHead";
 import { getSEOForPath } from "../data/seo";
 import ReCAPTCHA from "react-google-recaptcha";
 // ─── Config ────────────────────────────────────────────────────────
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
+const API_URL = import.meta.env.VITE_API_URL ?? "/api";
 
 // ─── Types ─────────────────────────────────────────────────────────
 interface ContactForm {

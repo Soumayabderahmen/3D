@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class AdminSeeder extends Seeder
 {
@@ -12,11 +13,13 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-         $user = User::factory()->create([
-
-            'name' => 'oumaima jlidi',
-            'email' => 'jlidioumaima01@gmail.com',
-            'password' => bcrypt('+-3dservices+-'),
-        ]);
+        User::updateOrCreate(
+            ['email' => 'jlidioumaima01@gmail.com'],
+            [
+                'name' => 'oumaima jlidi',
+                'password' => Hash::make('+-3dservices+-'),
+                'email_verified_at' => now(),
+            ]
+        );
     }
 }
